@@ -28,16 +28,17 @@ import {IRefeicao, RefeicaoTipo, nutridesc } from "@/model/refeicao"
 import { Toaster } from "@/components/ui/toaster"
 import { createMeal, getMeals, deleteMeal, updateMeal, getProfile } from "@/services/v1"
 import bcrypt from "bcryptjs"
+import { IUser } from "@/model/users"
 
 export default function Main() {
-  const user = await getProfile();
   const [meals, setMeals] = useState<IRefeicao[]>([])
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [email, setEmail] = useState<IUser["email"] | string>("")
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [currentFilter, setCurrentFilter] = useState<RefeicaoTipo | "todos">("todos")
   const [currentMeal, setCurrentMeal] = useState<IRefeicao | null>(null)
   const [newMeal, setNewMeal] = useState<Omit<IRefeicao, "_id">>({
-    userid: ,
+    useremail: email,
     refid: "",
     nome: "",
     favorito: false,
@@ -70,6 +71,14 @@ export default function Main() {
   });
 
   useEffect(() => {
+   const getUser = async () => {
+    const profile = await getProfile();
+    const email = await profile.email;
+    console.log(email)
+    setEmail(email);
+    console.log(email);
+   }
+   getUser()
    const getMeal = async () => {
       const meals = await getMeals();
       console.log(meals);
@@ -94,6 +103,7 @@ export default function Main() {
     const mealToAdd = { 
       ...newMeal, 
       refid: newId,
+      useremail: email,
       desc: {
         proteinas: nutriDesc.proteinas,
         carboidratos: nutriDesc.carboidratos,
@@ -111,6 +121,7 @@ export default function Main() {
       extra: {}
     });
     setNewMeal({
+      useremail: email,
       refid: "",
       nome: "",
       favorito: false,
@@ -218,7 +229,7 @@ export default function Main() {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Principal</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Bem vindo! {email}</h1>
             <p className="text-muted-foreground">Gerencie suas refeições e acompanhe suas calorias diárias.</p>
           </div>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>

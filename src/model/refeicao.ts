@@ -12,7 +12,7 @@ export interface nutridesc {
 
 export interface IRefeicao {
   _id?: ObjectId,
-  userid: string,
+  useremail: string,
   refid: string,
   nome: string;
   favorito: boolean,
@@ -23,7 +23,7 @@ export interface IRefeicao {
 }
 
 const esquemaRefeicao: Schema = new Schema({
-  userid: {type: String, required: true},
+  useremail: {type: String, required: true},
   refid: {type: String, required: true},
   nome: { type: String, required: true },
   favorito: {type: Boolean, required: true},

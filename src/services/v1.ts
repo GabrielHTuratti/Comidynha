@@ -48,7 +48,10 @@ export const getProfile = async () => {
     credentials: 'include',
     cache: 'no-store',
   });
-  return profile;
+  if(!profile.ok) throw new Error(`Erro ao buscar perfil => ${profile.json()}`)
+    const data = await profile.json()
+    console.log("testando" + data)
+    return data.user;
 }
 
 export const createMeal = async (meals: IRefeicao) => {
