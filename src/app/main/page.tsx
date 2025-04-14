@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo, SetStateAction } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -22,21 +22,24 @@ import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "@/components/ui/use-toast"
-import { Toast } from "@/components/ui/toast"
 
-import {IRefeicao, RefeicaoTipo, nutridesc } from "@/model/refeicao"
+import type { IRefeicao, nutridesc, RefeicaoTipo } from "@/model/refeicao"
 import { Toaster } from "@/components/ui/toaster"
 import { createMeal, getMeals, deleteMeal, updateMeal, getProfile } from "@/services/v1"
 import bcrypt from "bcryptjs"
-import { IUser } from "@/model/users"
+import type { IUser } from "@/model/users"
 
 export default function Main() {
   const [meals, setMeals] = useState<IRefeicao[]>([])
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [email, setEmail] = useState<IUser["email"] | string>("")
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [currentFilter, setCurrentFilter] = useState<RefeicaoTipo | "todos">("todos")
+
+  const [dialogState, setDialogState] = useState({
+    isAddOpen: false,
+    isEditOpen: false,
+  })
   const [currentMeal, setCurrentMeal] = useState<IRefeicao | null>(null)
+
   const [newMeal, setNewMeal] = useState<Omit<IRefeicao, "_id">>({
     useremail: email,
     refid: "",
@@ -53,90 +56,185 @@ export default function Main() {
     tipo: "cafe-da-manha",
   })
 
-  const [campoExtra, setCampoExtra] = useState<{key: string, value: string}[]>([])
-  const [currentCampoExtra, setCurrentCampoExtra] = useState<{key: string, value: string}[]>([]);
+  const filteredMeals = useMemo(() => {
+    return currentFilter === "todos" ? meals : meals.filter((meal) => meal.tipo === currentFilter)
+  }, [meals, currentFilter])
 
-  const [nutriDesc, setNutriDesc] = useState<nutridesc>({
-    proteinas: "",
-    carboidratos: "",
-    gorduras: "",
-    extra: {}
-  });
+  const totalcalorias = useMemo(() => {
+    return meals.reduce((total, meal) => {
+      const mealDate = new Date(meal.data).toDateString()
+      const today = new Date().toDateString()
 
-  const [currentNutriDesc, setCurrentNutriDesc] = useState<nutridesc>({
-    proteinas: "",
-    carboidratos: "",
-    gorduras: "",
-    extra: {}
-  });
+      if (mealDate === today) {
+        return total + meal.calorias
+      }
+      return total
+    }, 0)
+  }, [meals])
 
   useEffect(() => {
-   const getUser = async () => {
-    const profile = await getProfile();
-    const email = await profile.email;
-    console.log(email)
-    setEmail(email);
-    console.log(email);
-   }
-   getUser()
-   const getMeal = async () => {
-      const meals = await getMeals();
-      console.log(meals);
-      setMeals(meals);
-   }
-  getMeal()
+    const getUser = async () => {
+      const profile = await getProfile()
+      const email = await profile.email
+      setEmail(email)
+      setNewMeal((prev) => ({ ...prev, useremail: email }))
+    }
+    getUser()
+
+    const getMeal = async () => {
+      const meals = await getMeals()
+      setMeals(meals)
+    }
+    getMeal()
   }, [])
 
-  const filteredMeals = currentFilter === "todos" ? meals : meals.filter((meal) => meal.tipo === currentFilter)
+  const updateRefeicaoNova = (updates: Omit<IRefeicao, "_id">) => {
+    setNewMeal((prev) => ({ ...prev, ...updates }))
+  }
 
-  const totalcalorias = meals.reduce((total, meal) => {
-    const mealDate = new Date(meal.data).toDateString()
-    const today = new Date().toDateString()
+  const updateRefeicaoNovaDesc = (updates: nutridesc) => {
+    setNewMeal((prev) => ({
+      ...prev,
+      desc: { ...prev.desc, ...updates },
+    }))
+  }
 
-    if (mealDate === today) {
-      return total + meal.calorias
-    }
-    return total
-  }, 0)
+  const updateRefeicaoNovaExtra = (key: string, value: string) => {
+    setNewMeal((prev) => ({
+      ...prev,
+      desc: {
+        ...prev.desc,
+        extra: {
+          ...prev.desc.extra,
+          [key]: value,
+        },
+      },
+    }))
+  }
+
+  const updateRefeicaoAtualExtra = (key: string, value: string) => {
+    if (!currentMeal) return
+    setCurrentMeal(((prev) => {
+      if (!prev) return null;
+      return {...prev, desc: {...prev.desc,extra: {...prev.desc.extra,[key]: value,},
+      },
+    }}))
+  }
+
+  const removeRefeicaoNovaExtra = (key: string) => {
+    setNewMeal((prev) => {
+      const newExtra = { ...prev.desc.extra }
+      delete newExtra[key]
+      return {
+        ...prev,
+        desc: {
+          ...prev.desc,
+          extra: newExtra,
+        },
+      }
+    })
+  }
+
+  const addNewExtraField = () => {
+    setNewMeal((prev) => ({
+      ...prev,
+      desc: {
+        ...prev.desc,
+        extra: {
+          ...prev.desc.extra,
+          [`novo-campo-${Date.now()}`]: "",
+        },
+      },
+    }))
+  }
+
+  const updateRefeicaoAtual = (updates: SetStateAction<IRefeicao | null>) => {
+    if (!currentMeal) return
+    setCurrentMeal((prev) => {
+      if (!prev) return null; 
+      return { ...currentMeal, ...updates }})
+  }
+
+  const updateRefeicaoAtualDesc = (updates: nutridesc) => {
+    if (!currentMeal) return
+    setCurrentMeal((prev) => {
+      if (!prev) return null; 
+
+      return {...currentMeal,desc: { ...currentMeal.desc, ...updates }}})
+  }
+
+  const removeRefeicaoAtualExtra = (key: string) => {
+    if (!currentMeal) return;
+    setCurrentMeal((prev) => {
+        if (!prev) return null;
+        const newExtra = { ...prev.desc.extra };
+        delete newExtra[key];
+        return {
+            ...prev,
+            desc: {
+                ...prev.desc,
+                extra: newExtra,
+            },
+        };
+    });
+};
+
+const addCurrentExtraField = () => {
+  if (!currentMeal) return;
+  
+  setCurrentMeal((prev) => {
+    if (!prev) return null;
+    
+    return {
+      ...prev,
+      desc: {
+        ...prev.desc,
+        extra: {
+          ...prev.desc.extra,
+          [`campo-${Date.now()}`]: "",
+        },
+      },
+    };
+  });
+};
+
   const handleAddMeal = async () => {
-    const newId = await bcrypt.genSalt(18);
-    const mealToAdd = { 
-      ...newMeal, 
+    const newId = await bcrypt.genSalt(18)
+    const mealToAdd = {
+      ...newMeal,
       refid: newId,
       useremail: email,
-      desc: {
-        proteinas: nutriDesc.proteinas,
-        carboidratos: nutriDesc.carboidratos,
-        gorduras: nutriDesc.gorduras,
-        extra: campoExtra.reduce((acc, field) => ({...acc, [field.key]: field.value}), {})
-      }
     }
+
     setMeals([...meals, mealToAdd])
-    setIsAddDialogOpen(false)
-    setCampoExtra([]);
-    setNutriDesc({
-      proteinas: "",
-      carboidratos: "",
-      gorduras: "",
-      extra: {}
-    });
+    setDialogState({ ...dialogState, isAddOpen: false })
+
     setNewMeal({
       useremail: email,
       refid: "",
       nome: "",
       favorito: false,
-      desc: nutriDesc,
+      desc: {
+        proteinas: "",
+        carboidratos: "",
+        gorduras: "",
+        extra: {},
+      },
       calorias: 0,
       data: new Date().toISOString().slice(0, 16),
       tipo: "cafe-da-manha",
     })
+
     toast({
       title: "Refeição adicionada",
       description: "Sua refeição foi adicionada com sucesso.",
-    })    
-    alert(`tentando criar...! ${mealToAdd}`);
-    const response = await createMeal(mealToAdd);
-    alert(`Criado com sucesso! ${response}`);
+    })
+
+    try {
+      const response = await createMeal(mealToAdd)
+    } catch (error) {
+      console.error("Erro ao criar refeição:", error)
+    }
   }
 
   const handleEditMeal = async () => {
@@ -144,49 +242,43 @@ export default function Main() {
       toast({
         title: "Erro",
         description: "Nenhuma refeição selecionada para edição",
-        variant: "destructive"
-      });
-      return;
+        variant: "destructive",
+      })
+      return
     }
 
-    const mealToUpdate = {
-      ...currentMeal,
-      desc: {
-        ...currentMeal.desc,
-        extra: currentCampoExtra.reduce((acc, field) => ({ 
-          ...acc, 
-          [field.key]: field.value 
-        }), {})
-      }
-    };
-    console.log(mealToUpdate)
-    const response = await updateMeal(mealToUpdate);
-    alert(response.status);
-    setMeals(meals.map(meal => 
-      meal.refid === currentMeal.refid ? currentMeal : meal
-    ));
-    setIsEditDialogOpen(false)
-    setCurrentMeal(null)
-    toast({
-      title: "Refeição atualizada",
-      description: "Sua refeição foi atualizada com sucesso.",
-    })
+    try {
+      const response = await updateMeal(currentMeal)
+      setMeals(meals.map((meal) => (meal.refid === currentMeal.refid ? currentMeal : meal)))
+      setDialogState({ ...dialogState, isEditOpen: false })
+      setCurrentMeal(null)
+
+      toast({
+        title: "Refeição atualizada",
+        description: "Sua refeição foi atualizada com sucesso.",
+      })
+    } catch (error) {
+      console.error("Erro ao atualizar refeição:", error)
+    }
   }
 
   const handleDeleteMeal = async (id: string) => {
-    const updatedMeals = meals.filter((meal) => meal.refid !== id)
-    const deletedMeals = meals.filter((meal) => meal.refid === id);
-    deletedMeals.forEach(async (meal) => {
-      const response = await deleteMeal(meal);
-      alert(response);
-    })
-    console.log("itens não deletados:" + updatedMeals);
-    setMeals(updatedMeals)
-    toast({
-      title: "Refeição removida",
-      description: "Sua refeição foi removida com sucesso.",
-    })
+    try {
+      const updatedMeals = meals.filter((meal) => meal.refid !== id)
+      const deletedMeals = meals.filter((meal) => meal.refid === id)
 
+      for (const meal of deletedMeals) {
+        await deleteMeal(meal)
+      }
+
+      setMeals(updatedMeals)
+      toast({
+        title: "Refeição removida",
+        description: "Sua refeição foi removida com sucesso.",
+      })
+    } catch (error) {
+      console.error("Erro ao deletar refeição:", error)
+    }
   }
 
   const getMealTypeIcon = (type: RefeicaoTipo) => {
@@ -219,11 +311,6 @@ export default function Main() {
     }
   }
 
-  const handleAddDescExtra = () => {
-    //
-  }
-
-
   return (
     <div className="container py-6 px-4 md:px-6">
       <div className="flex flex-col gap-6">
@@ -232,7 +319,10 @@ export default function Main() {
             <h1 className="text-3xl font-bold tracking-tight">Bem vindo! {email}</h1>
             <p className="text-muted-foreground">Gerencie suas refeições e acompanhe suas calorias diárias.</p>
           </div>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <Dialog
+            open={dialogState.isAddOpen}
+            onOpenChange={(open) => setDialogState({ ...dialogState, isAddOpen: open })}
+          >
             <DialogTrigger asChild>
               <Button className="bg-emerald-600 hover:bg-emerald-700">
                 <Plus className="mr-2 h-4 w-4" /> Adicionar Refeição
@@ -249,7 +339,7 @@ export default function Main() {
                   <Input
                     id="name"
                     value={newMeal.nome}
-                    onChange={(e) => setNewMeal({ ...newMeal, nome: e.target.value })}
+                    onChange={(e) => updateRefeicaoNova({...newMeal, nome: e.target.value })}
                     placeholder="Ex: Salada com frango grelhado"
                   />
                 </div>
@@ -259,62 +349,49 @@ export default function Main() {
                     <div className="grid gap-2">
                       <Label>Proteínas (g)</Label>
                       <Input
-                        value={nutriDesc.proteinas}
-                        onChange={(e) => setNutriDesc({...nutriDesc, proteinas: e.target.value})}
+                        value={newMeal.desc.proteinas}
+                        onChange={(e) => updateRefeicaoNovaDesc({ proteinas: e.target.value })}
                       />
                     </div>
                     <div className="grid gap-2">
                       <Label>Carboidratos (g)</Label>
                       <Input
-                        value={nutriDesc.carboidratos}
-                        onChange={(e) => setNutriDesc({...nutriDesc, carboidratos: e.target.value})}
+                        value={newMeal.desc.carboidratos}
+                        onChange={(e) => updateRefeicaoNovaDesc({ carboidratos: e.target.value })}
                       />
                     </div>
                     <div className="grid gap-2">
                       <Label>Gorduras (g)</Label>
                       <Input
-                        value={nutriDesc.gorduras}
-                        onChange={(e) => setNutriDesc({...nutriDesc, gorduras: e.target.value})}
+                        value={newMeal.desc.gorduras}
+                        onChange={(e) => updateRefeicaoNovaDesc({ gorduras: e.target.value })}
                       />
                     </div>
-                    
-                    {campoExtra.map((field, index) => (
+
+                    {Object.entries(newMeal.desc.extra || {}).map(([key, value], index) => (
                       <div key={index} className="grid grid-cols-3 gap-2 items-end">
                         <div className="grid gap-2">
                           <Label>Nome</Label>
                           <Input
-                            value={field.key}
+                            value={key}
                             onChange={(e) => {
-                              const updated = [...campoExtra];
-                              updated[index].key = e.target.value;
-                              setCampoExtra(updated);
+                              const newKey = e.target.value
+                              const newValue = value
+                              removeRefeicaoNovaExtra(key)
+                              updateRefeicaoNovaExtra(newKey, newValue)
                             }}
                           />
                         </div>
                         <div className="grid gap-2">
                           <Label>Valor</Label>
-                          <Input
-                            value={field.value}
-                            onChange={(e) => {
-                              const updated = [...campoExtra];
-                              updated[index].value = e.target.value;
-                              setCampoExtra(updated);
-                            }}
-                          />
+                          <Input value={value} onChange={(e) => updateRefeicaoNovaExtra(key, e.target.value)} />
                         </div>
-                        <Button 
-                          variant="destructive" 
-                          onClick={() => setCampoExtra(campoExtra.filter((_, i) => i !== index))}
-                        >
+                        <Button variant="destructive" onClick={() => removeRefeicaoNovaExtra(key)}>
                           Remover
                         </Button>
                       </div>
                     ))}
-                    
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setCampoExtra([...campoExtra, {key: '', value: ''}])}
-                    >
+                    <Button variant="outline" onClick={addNewExtraField}>
                       Adicionar Campo Extra
                     </Button>
                   </div>
@@ -325,7 +402,7 @@ export default function Main() {
                     id="calorias"
                     type="number"
                     value={newMeal.calorias || ""}
-                    onChange={(e) => setNewMeal({ ...newMeal, calorias: Number.parseInt(e.target.value) || 0 })}
+                    onChange={(e) => updateRefeicaoNova({...newMeal, calorias: Number.parseInt(e.target.value) || 0 })}
                     placeholder="Ex: 350"
                   />
                 </div>
@@ -334,15 +411,15 @@ export default function Main() {
                   <Input
                     id="datetime"
                     type="datetime-local"
-                    value={newMeal.data}
-                    onChange={(e) => setNewMeal({ ...newMeal, data: e.target.value })}
+                    value={IsoStringToDate(newMeal.data)}
+                    onChange={(e) => updateRefeicaoNova({...newMeal, data: dateToIsoString(e.target.value) })}
                   />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="type">Tipo de Refeição</Label>
                   <Select
                     value={newMeal.tipo}
-                    onValueChange={(value) => setNewMeal({ ...newMeal, tipo: value as RefeicaoTipo })}
+                    onValueChange={(value) => updateRefeicaoNova({...newMeal, tipo: value as RefeicaoTipo })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione o tipo" />
@@ -357,7 +434,7 @@ export default function Main() {
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                <Button variant="outline" onClick={() => setDialogState({ ...dialogState, isAddOpen: false })}>
                   Cancelar
                 </Button>
                 <Button
@@ -372,32 +449,32 @@ export default function Main() {
           </Dialog>
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total de Calorias Hoje</CardTitle>
-                <Flame className="h-4 w-4 text-orange-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{totalcalorias} kcal</div>
-                <p className="text-xs text-muted-foreground">
-                  {new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
-                </p>
-              </CardContent>
-            </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total de Calorias Hoje</CardTitle>
+              <Flame className="h-4 w-4 text-orange-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalcalorias} kcal</div>
+              <p className="text-xs text-muted-foreground">
+                {new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
+              </p>
+            </CardContent>
+          </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total de Refeições Hoje</CardTitle>
-                <Flame className="h-4 w-4 text-orange-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{meals.length} Refeições </div>
-                <p className="text-xs text-muted-foreground">
-                  {new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total de Refeições Hoje</CardTitle>
+              <Flame className="h-4 w-4 text-orange-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{meals.length} Refeições </div>
+              <p className="text-xs text-muted-foreground">
+                {new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
         <Tabs
           defaultValue="todos"
           className="w-full"
@@ -417,7 +494,11 @@ export default function Main() {
                 <CardContent className="flex flex-col items-center justify-center py-10">
                   <Utensils className="h-10 w-10 text-muted-foreground mb-4" />
                   <p className="text-muted-foreground text-center">Nenhuma refeição encontrada.</p>
-                  <Button variant="outline" className="mt-4" onClick={() => setIsAddDialogOpen(true)}>
+                  <Button
+                    variant="outline"
+                    className="mt-4"
+                    onClick={() => setDialogState({ ...dialogState, isAddOpen: true })}
+                  >
                     Adicionar Refeição
                   </Button>
                 </CardContent>
@@ -430,7 +511,7 @@ export default function Main() {
                     meal={meal}
                     onEdit={(meal) => {
                       setCurrentMeal(meal)
-                      setIsEditDialogOpen(true)
+                      setDialogState({ ...dialogState, isEditOpen: true })
                     }}
                     onDelete={handleDeleteMeal}
                   />
@@ -452,8 +533,8 @@ export default function Main() {
                       variant="outline"
                       className="mt-4"
                       onClick={() => {
-                        setNewMeal({ ...newMeal, tipo: type as RefeicaoTipo })
-                        setIsAddDialogOpen(true)
+                        updateRefeicaoNova({...newMeal, tipo: type as RefeicaoTipo })
+                        setDialogState({ ...dialogState, isAddOpen: true })
                       }}
                     >
                       Adicionar {getMealTypeName(type as RefeicaoTipo)}
@@ -468,7 +549,7 @@ export default function Main() {
                       meal={meal}
                       onEdit={(meal) => {
                         setCurrentMeal(meal)
-                        setIsEditDialogOpen(true)
+                        setDialogState({ ...dialogState, isEditOpen: true })
                       }}
                       onDelete={handleDeleteMeal}
                     />
@@ -480,8 +561,10 @@ export default function Main() {
         </Tabs>
       </div>
 
-      {}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+      <Dialog
+        open={dialogState.isEditOpen}
+        onOpenChange={(open) => setDialogState({ ...dialogState, isEditOpen: open })}
+      >
         <DialogContent className="max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Editar Refeição</DialogTitle>
@@ -494,37 +577,64 @@ export default function Main() {
                 <Input
                   id="edit-name"
                   value={currentMeal.nome}
-                  onChange={(e) => setCurrentMeal({ ...currentMeal, nome: e.target.value })}
+                  onChange={(e) => updateRefeicaoAtual({...currentMeal, nome: e.target.value })}
                 />
               </div>
               <div className="grid gap-2">
-              <Label htmlFor="edit-desc">Descrição Nutricional</Label>
+                <Label htmlFor="edit-desc">Descrição Nutricional</Label>
                 <Label htmlFor="edit-gordura">Gordura</Label>
                 <Textarea
                   id="edit-gordura"
-                  value={currentNutriDesc.gorduras}
-                  onChange={(e) => setCurrentNutriDesc({ ...currentNutriDesc, gorduras: e.target.value })}
+                  value={currentMeal.desc.gorduras}
+                  onChange={(e) => updateRefeicaoAtualDesc({ gorduras: e.target.value })}
                 />
                 <Label htmlFor="edit-prot">Proteina</Label>
                 <Textarea
                   id="edit-prot"
-                  value={currentNutriDesc.proteinas}
-                  onChange={(e) => setCurrentNutriDesc({ ...currentNutriDesc, proteinas: e.target.value })}
+                  value={currentMeal.desc.proteinas}
+                  onChange={(e) => updateRefeicaoAtualDesc({ proteinas: e.target.value })}
                 />
                 <Label htmlFor="edit-carb">Carboidrato</Label>
                 <Textarea
                   id="edit-carb"
-                  value={currentNutriDesc.carboidratos}
-                  onChange={(e) => setCurrentNutriDesc({ ...currentNutriDesc, carboidratos: e.target.value })}
+                  value={currentMeal.desc.carboidratos}
+                  onChange={(e) => updateRefeicaoAtualDesc({ carboidratos: e.target.value })}
                 />
               </div>
+              {Object.entries(currentMeal.desc.extra || {}).map(([extraKey, extraValue], index) => (
+                <div key={index} className="grid grid-cols-3 gap-2 items-end">
+                  <div className="grid gap-2">
+                    <Label>Nome</Label>
+                    <Input
+                      value={extraKey}
+                      onChange={(e) => {
+                        const newKey = e.target.value
+                        const newValue = extraValue
+                        removeRefeicaoAtualExtra(extraKey)
+                        updateRefeicaoAtualExtra(newKey, newValue)
+                      }}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>Valor</Label>
+                    <Input value={extraValue} onChange={(e) => updateRefeicaoAtualExtra(extraKey, e.target.value)} />
+                  </div>
+                  <Button variant="destructive" onClick={() => removeRefeicaoAtualExtra(extraKey)}>
+                    Remover
+                  </Button>
+                </div>
+              ))}
+
+              <Button variant="outline" onClick={addCurrentExtraField}>
+                Adicionar Campo Extra
+              </Button>
               <div className="grid gap-2">
                 <Label htmlFor="edit-calorias">Calorias</Label>
                 <Input
                   id="edit-calorias"
                   type="number"
                   value={currentMeal.calorias || ""}
-                  onChange={(e) => setCurrentMeal({ ...currentMeal, calorias: Number.parseInt(e.target.value) || 0 })}
+                  onChange={(e) => updateRefeicaoAtual({...currentMeal,  calorias: Number.parseInt(e.target.value) || 0 })}
                 />
               </div>
               <div className="grid gap-2">
@@ -532,15 +642,15 @@ export default function Main() {
                 <Input
                   id="edit-datetime"
                   type="datetime-local"
-                  value={currentMeal.data}
-                  onChange={(e) => setCurrentMeal({ ...currentMeal, data: e.target.value })}
+                  value={IsoStringToDate(currentMeal.data)}
+                  onChange={(e) => updateRefeicaoAtual({...currentMeal, data: dateToIsoString(e.target.value) })}
                 />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="edit-type">Tipo de Refeição</Label>
                 <Select
                   value={currentMeal.tipo}
-                  onValueChange={(value) => setCurrentMeal({ ...currentMeal, tipo: value as RefeicaoTipo })}
+                  onValueChange={(value) => updateRefeicaoAtual({...currentMeal,  tipo: value as RefeicaoTipo })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o tipo" />
@@ -556,7 +666,7 @@ export default function Main() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setDialogState({ ...dialogState, isEditOpen: false })}>
               Cancelar
             </Button>
             <Button
@@ -570,7 +680,7 @@ export default function Main() {
         </DialogContent>
       </Dialog>
 
-      <Toaster/>
+      <Toaster />
     </div>
   )
 }
@@ -588,7 +698,7 @@ function MealCard({ meal, onEdit, onDelete }: MealCardProps) {
 
   return (
     <Card>
-      <CardHeader className="pb-2"> 
+      <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-2">
             <div className="rounded-full bg-emerald-100 p-1 dark:bg-emerald-900">{getMealTypeIcon(meal.tipo)}</div>
@@ -598,7 +708,24 @@ function MealCard({ meal, onEdit, onDelete }: MealCardProps) {
             {getMealTypeName(meal.tipo)}
           </Badge>
         </div>
-        <CardDescription>{meal.desc.carboidratos}</CardDescription>
+        {meal.desc && Object.keys(meal.desc).length > 0 && (
+          <>
+            {meal.desc.carboidratos !== undefined && (
+              <CardDescription>Carboidratos: {meal.desc.carboidratos}g</CardDescription>
+            )}
+            {meal.desc.proteinas !== undefined && <CardDescription>Proteínas: {meal.desc.proteinas}g</CardDescription>}
+            {meal.desc.gorduras !== undefined && <CardDescription>Gorduras: {meal.desc.gorduras}g</CardDescription>}
+            {meal.desc.extra && typeof meal.desc.extra === "object" && (
+              <>
+                {Object.entries(meal.desc.extra).map(([extraKey, extraValue], index) => (
+                  <CardDescription key={`extra-${index}`}>
+                    {extraKey}: {extraValue}g
+                  </CardDescription>
+                ))}
+              </>
+            )}
+          </>
+        )}
       </CardHeader>
       <CardContent>
         <div className="flex justify-between items-center">
@@ -636,6 +763,19 @@ function getMealTypeIcon(type: RefeicaoTipo) {
     default:
       return <Utensils className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
   }
+}
+
+function IsoStringToDate(isoString: string) {
+  const date = new Date(isoString)
+
+  const offset = date.getTimezoneOffset() * 60000
+  const localDate = new Date(date.getTime() - offset)
+
+  return localDate.toISOString().slice(0, 16)
+}
+
+function dateToIsoString(date: string) {
+  return new Date(date).toISOString()
 }
 
 function getMealTypeName(type: RefeicaoTipo) {

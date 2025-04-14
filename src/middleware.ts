@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
-import jwt from 'jsonwebtoken';
+import {jwtVerify} from 'jose';
+
+process.env.JWT_SECRET = "G@BR!3LTUR4TT1D3V3L0P3RJUN10RF1N2NCY4PP";
 
 export async function middleware(request: NextRequest) {
   const { pathname, origin } = request.nextUrl;
   
-  const publicPaths = ['/auth/login', '/auth/register'];
+  const publicPaths = ['/auth'];
   if (publicPaths.includes(pathname)) {
     return NextResponse.next();
   }
@@ -16,7 +18,8 @@ export async function middleware(request: NextRequest) {
     const token = (await cookies()).get('auth_token')?.value;
     
     if (token) {
-      jwt.verify(token, process.env.JWT_SECRET!);
+      const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+      await jwtVerify(token, secret);
       isAuthenticated = true;
     }
   } catch (error) {
@@ -24,17 +27,17 @@ export async function middleware(request: NextRequest) {
     isAuthenticated = false;
   }
 
-  if (pathname.startsWith('/app') && !isAuthenticated) {
-    const redirectUrl = new URL('/auth/login', origin);
+  if (pathname.startsWith('/main') && !isAuthenticated) {
+    const redirectUrl = new URL('/auth/customer', origin);
     redirectUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(redirectUrl);
   }
 
   if (pathname.startsWith('/auth') && isAuthenticated) {
-    return NextResponse.redirect(new URL('/app', origin));
+    return NextResponse.redirect(new URL('/main', origin));
   }
 
-  if (pathname.startsWith('/api/secure') && !isAuthenticated) {
+  if (pathname.startsWith('/api/refeicao') && !isAuthenticated) {
     return NextResponse.json(
       { error: 'Não autorizado' },
       { status: 401 }
@@ -46,8 +49,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/app/:path*',
+    '/main/:path*',
     '/auth/:path*',
-    '/api/secure/:path*'
+    '/api/:path*'
   ]
 };

@@ -67,10 +67,17 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  await dbConnect();
-  const body = await request.json();
-  const meal = await Meal.deleteOne(body);
-  return NextResponse.json(meal, { status: 201 });
+  try{
+    await dbConnect();
+    const body = await request.json();
+    const meal = await Meal.findByIdAndDelete(body._id);
+    console.log(meal);
+    return NextResponse.json(meal, { status: 201 });
+  }catch(err){
+    console.log(err)
+    return NextResponse.json(err, { status: 500});
+  }
+
 }
 
 export async function PUT(request: Request) {

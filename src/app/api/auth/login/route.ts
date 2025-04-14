@@ -5,6 +5,8 @@ import User from '@/model/users';
 import dbConnect from '@/lib/db';
 import bcrypt from 'bcryptjs';
 
+process.env.JWT_SECRET= "G@BR!3LTUR4TT1D3V3L0P3RJUN10RF1N2NCY4PP";
+
 
 export async function POST(request: Request) {
   const { email, password } = await request.json();
@@ -24,7 +26,7 @@ export async function POST(request: Request) {
       { error: 'Credenciais inválidas' },
       { status: 401 }
     );
-    const sessionToken = jwt.sign({userEmail: user.email,
+    const sessionToken = jwt.sign({email: user.email,
       userId: user._id}, process.env.JWT_SECRET!,{expiresIn: '1d'})
     
     const activeSessions = new Set<string>();

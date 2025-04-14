@@ -6,7 +6,7 @@ export interface nutridesc {
   proteinas?: string,
   carboidratos?: string,
   gorduras?: string,
-  extra?: Object
+  extra?: Record<string, string>
 }
 
 
