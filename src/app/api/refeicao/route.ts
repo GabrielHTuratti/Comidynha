@@ -56,7 +56,7 @@ export async function POST(request: Request) {
     await dbConnect();
     const body = await request.json();
     console.log(body)
-    const meal = await Meal.create(body);
+    const meal = await Meal.create(body); 
     console.log(meal);
     return NextResponse.json(meal, { status: 201 });
   }catch(err){

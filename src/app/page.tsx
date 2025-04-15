@@ -8,7 +8,7 @@ export default function Home() {
       <header className="border-b bg-[#F36280] text-white">
         <div className="container flex items-center justify-between h-16 px-4 md:px-6">
           <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
-            <Utensils className="h-6 w-6 text-primary" />
+            <Utensils className="h-6 w-6 text-emerald-500" />
             <span>Comydinha</span>
           </Link>
           <div className="flex items-center gap-4">
@@ -161,7 +161,7 @@ export default function Home() {
       <footer className="border-t bg-[#F36280] text-white">
         <div className="container flex flex-col gap-6 py-8 md:flex-row md:items-center md:justify-between md:py-12">
         <div className="flex items-center pl-4 gap-4">
-          <Utensils className="h-6 w-6 text-primary" />
+          <Utensils className="h-6 w-6 text-emerald-500" />
             <span className="text-lg font-semibold">Comydinha</span>
           </div>
           <div className="flex items-center gap-4">

@@ -65,11 +65,11 @@ export default function CustomerAuthPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b bg-[#F36280]">
+      <header className="border-b bg-[#F36280] text-white">
         <div className="container flex items-center justify-between h-16 px-4 md:px-6">
           <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
-            <Utensils className="h-6 w-6 text-primary" />
-            <span>Comydinha</span>
+            <Utensils className="h-6 w-6 text-emerald-500" />
+            <span>Comidynha</span>
           </Link>
           <nav className="hidden md:flex gap-6">
             <Link href="/" className="text-sm font-medium hover:underline underline-offset-4">
@@ -86,9 +86,9 @@ export default function CustomerAuthPage() {
             <p className="text-muted-foreground mt-2">Faça seu login ou crie uma conta para gerenciar suas refeições</p>
           </div>
 
-          <Tabs defaultValue="login" className="w-full">
+          <Tabs defaultValue="login" className="w-full ">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Login</TabsTrigger>
+              <TabsTrigger  value="login">Login</TabsTrigger>
               <TabsTrigger value="register">Registrar</TabsTrigger>
             </TabsList>
 
@@ -130,7 +130,7 @@ export default function CustomerAuthPage() {
                       </Alert>
                     )}
 
-                    <Button type="submit" className="w-full" disabled={isLoginLoading}>
+                    <Button type="submit" className="w-full bg-[#007f5f]" disabled={isLoginLoading}>
                       {isLoginLoading ? "Entrando..." : "Entrar"}
                     </Button>
                   </form>
@@ -187,7 +187,7 @@ export default function CustomerAuthPage() {
                       </Alert>
                     )}
 
-                    <Button type="submit" className="w-full" disabled={isRegisterLoading}>
+                    <Button type="submit" className="w-full bg-[#007f5f]" disabled={isRegisterLoading}>
                       {isRegisterLoading ? "Registrando..." : "Registrar"}
                     </Button>
                   </form>
@@ -198,10 +198,10 @@ export default function CustomerAuthPage() {
         </div>
       </main>
 
-      <footer className="border-t mt-auto">
+      <footer className="border-t mt-auto bg-[#b4436c] text-white">
         <div className="container flex flex-col gap-6 py-8 md:flex-row md:items-center md:justify-between md:py-12">
           <div className="flex pl-4 items-center gap-2">
-            <Utensils className="h-6 w-6 text-primary" />
+            <Utensils className="h-6 w-6 text-emerald-500" />
             <span className="text-lg font-semibold">Comydinha</span>
           </div>
           <div className="flex items-center gap-4">

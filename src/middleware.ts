@@ -3,8 +3,6 @@ import type { NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
 import {jwtVerify} from 'jose';
 
-process.env.JWT_SECRET = "G@BR!3LTUR4TT1D3V3L0P3RJUN10RF1N2NCY4PP";
-
 export async function middleware(request: NextRequest) {
   const { pathname, origin } = request.nextUrl;
   

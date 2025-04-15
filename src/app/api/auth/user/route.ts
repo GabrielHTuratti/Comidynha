@@ -5,7 +5,6 @@ import IUser from '@/model/users';
 import { dbConnect } from '@/lib/db';
 
 
-process.env.JWT_SECRET = "G@BR!3LTUR4TT1D3V3L0P3RJUN10RF1N2NCY4PP";
 
 export async function GET() {
   try {

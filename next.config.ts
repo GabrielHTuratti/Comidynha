@@ -5,4 +5,13 @@ const nextConfig = {
   assetPrefix: '', // Defina o assetPrefix como vazio se estiver na raiz
 };
 
+
+module.exports = {
+  env: {
+    JWT_SECRET: process.env.JWT_SECRET,
+    MONGODB_URI: process.env.MONGODB_URI,
+  },
+}
+
+
 export default nextConfig;

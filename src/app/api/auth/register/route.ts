@@ -20,7 +20,6 @@ const registerSchema = z.object({
     .regex(/[0-9]/, { message: "Senha deve conter pelo menos 1 número" })
 });
 
-process.env.JWT_SECRET= "G@BR!3LTUR4TT1D3V3L0P3RJUN10RF1N2NCY4PP";
  
 
 export async function POST(request: Request) {
