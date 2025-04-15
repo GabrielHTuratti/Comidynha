@@ -83,8 +83,9 @@ export async function DELETE(request: Request) {
 export async function PUT(request: Request) {
   await dbConnect();
   const body = await request.json();
+  const {_id, ...updateData } = body;
   console.log(body);
-  const meal = await Meal.updateOne(body);
+  const meal = await Meal.updateOne({_id}, {$set: updateData});
   console.log(meal);
   return NextResponse.json(meal, { status: 201 });
 }

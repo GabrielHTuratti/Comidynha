@@ -60,20 +60,23 @@ export function EditMealDialog({
             <div className="grid gap-2">
               <Label htmlFor="edit-desc">Descrição Nutricional</Label>
               <Label htmlFor="edit-gordura">Gordura</Label>
-              <Textarea
+              <Input
                 id="edit-gordura"
+                type="number"
                 value={refeicaoAtual.desc.gorduras}
                 onChange={(e) => updateRefeicaoAtualDesc({ gorduras: e.target.value })}
               />
               <Label htmlFor="edit-prot">Proteina</Label>
-              <Textarea
+              <Input
                 id="edit-prot"
+                type="number"
                 value={refeicaoAtual.desc.proteinas}
                 onChange={(e) => updateRefeicaoAtualDesc({ proteinas: e.target.value })}
               />
               <Label htmlFor="edit-carb">Carboidrato</Label>
-              <Textarea
+              <Input
                 id="edit-carb"
+                type="number"
                 value={refeicaoAtual.desc.carboidratos}
                 onChange={(e) => updateRefeicaoAtualDesc({ carboidratos: e.target.value })}
               />

@@ -60,6 +60,7 @@ export function AddMealDialog({
               <div className="grid gap-2">
                 <Label>Proteínas (g)</Label>
                 <Input
+                  type="number"
                   value={refeicaoNova.desc.proteinas}
                   onChange={(e) => updateRefeicaoNovaDesc({ proteinas: e.target.value })}
                 />
@@ -67,6 +68,7 @@ export function AddMealDialog({
               <div className="grid gap-2">
                 <Label>Carboidratos (g)</Label>
                 <Input
+                  type="number"
                   value={refeicaoNova.desc.carboidratos}
                   onChange={(e) => updateRefeicaoNovaDesc({ carboidratos: e.target.value })}
                 />
@@ -74,6 +76,7 @@ export function AddMealDialog({
               <div className="grid gap-2">
                 <Label>Gorduras (g)</Label>
                 <Input
+                  type="number"
                   value={refeicaoNova.desc.gorduras}
                   onChange={(e) => updateRefeicaoNovaDesc({ gorduras: e.target.value })}
                 />

@@ -11,7 +11,6 @@ export interface nutridesc {
 
 
 export interface IRefeicao {
-  _id?: ObjectId,
   useremail: string,
   refid: string,
   nome: string;
