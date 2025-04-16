@@ -207,7 +207,7 @@ export default function Main() {
         extra: [campoExtraNovo],
       },
       calorias: 0,
-      data: new Date().toISOString().slice(0, 16),
+      data: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16),
       tipo: "cafe-da-manha",
     })
 

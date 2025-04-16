@@ -162,8 +162,8 @@ export function generateMealsPDF(meals: IRefeicao[], userName: string) {
       doc.text("Informações adicionais:", margin + 5, yPos)
 
       yPos += 5
-      Object.entries(meal.desc.extra).forEach(([key, value], i) => {
-        doc.text(`• ${key}: ${value}`, margin + 10, yPos)
+      meal.desc.extra.forEach((campo) => {
+        doc.text(`• ${campo.nome}: ${campo.valor}`, margin + 10, yPos)
         yPos += 5
       })
     }
