@@ -1,6 +1,5 @@
 "use client"
 
-// Adapted from https://github.com/shadcn-ui/ui/blob/main/apps/www/registry/default/ui/use-toast.ts
 import * as React from "react"
 
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast"
@@ -15,6 +14,7 @@ type ToasterToast = ToastProps & {
   action?: ToastActionElement
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
   UPDATE_TOAST: "UPDATE_TOAST",

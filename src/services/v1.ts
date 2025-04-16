@@ -1,6 +1,5 @@
 
-import {IRefeicao, RefeicaoTipo } from "@/model/refeicao"
-import bcrypt from "bcryptjs";
+import {IRefeicao } from "@/model/refeicao"
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -19,7 +18,11 @@ export const authenticate = async (email: string, password: string) =>{
     }
     return response.json();
 }
-export const registrar = async (data: {}) => {
+export const registrar = async (data: {
+  email: string;
+  name: string;
+  password: string;
+} ) => {
     console.log(JSON.stringify(data));
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
@@ -115,22 +118,3 @@ export const getMeals = async () => {
   return response.json();
 
 }
-
-// export const validar = async (): Promise<{ isAuthenticated: boolean }> => {
-//   try {
-//     const response = await fetch(`${API_BASE_URL}/authentication/validateToken`, {
-//       method: 'GET',
-//       credentials: 'include',
-//       cache: 'no-store'
-//     });
-//     console.log("status da requisição:" + response.status)
-//     if (response.status === 401) {
-//       return { isAuthenticated: false};
-//     }
-
-//     return { isAuthenticated: true };
-//   } catch (error) {
-//     console.error('Authentication check failed:', error);
-//     return { isAuthenticated: false };
-//   }
-// };

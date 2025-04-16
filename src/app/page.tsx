@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { MapPin, Search, Utensils } from "lucide-react"
+import {Utensils } from "lucide-react"
 
 export default function Home() {
   return (

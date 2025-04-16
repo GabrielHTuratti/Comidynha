@@ -1,15 +1,16 @@
 'use client'
+import { IRefeicao } from "@/model/refeicao"
 import { confirmToast } from "./confirmarButton"
+import { toast } from "../ui/use-toast"
 
 export const handleDeletarRefeicao = async (
     id: string,
-    meals: any[],
-    setRefeicao: (meals: any[]) => void,
-    deleteMeal: (meal: any) => Promise<void>,
-    toast: any,
+    meals: IRefeicao[],
+    setRefeicao: (meals: IRefeicao[]) => void,
+    deleteMeal: (meal: IRefeicao) => Promise<void>
   ) => {
-    confirmToast(
-      toast, 
+    confirmToast( 
+      toast,
       "Tem certeza que deseja remover esta refeição?",
       async () => {
         try {

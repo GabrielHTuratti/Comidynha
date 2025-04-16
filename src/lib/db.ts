@@ -5,12 +5,17 @@ const MONGODB_URI = "mongodb+srv://yPestiss:devJunior_J8hgFJylHkbGkGc9@financydb
 if (!MONGODB_URI) {
   throw new Error('faltou o URI do mongodb ai chapa');
 }
-
-let cached = (global as any).mongoose;
-
-if (!cached) {
-  cached = (global as any).mongoose = { conn: null, promise: null };
+interface MongooseCache {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
 }
+
+const cached = (global as { mongoose?: MongooseCache }).mongoose || { 
+  conn: null, 
+  promise: null 
+};
+
+(global as unknown as { mongoose: MongooseCache }).mongoose = cached;
 
 export async function dbConnect() {
   if (cached.conn) return cached.conn;

@@ -42,9 +42,15 @@ userSchema.pre('save', async function(next) {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();
-  } catch (error: any) {
-    next(error);
-  }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+        next(error);
+    } else if (typeof error === 'string') {
+        next(new Error(error));
+    } else {
+        next(new Error('Unknown error'));
+    }
+}
 });
 
 userSchema.methods.comparePassword = async function(candidatePassword: string) {

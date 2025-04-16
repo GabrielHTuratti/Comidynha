@@ -1,4 +1,4 @@
-import mongoose, { ObjectId, Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
 export type RefeicaoTipo = "cafe-da-manha" | "almoco" | "lanche-da-tarde" | "janta"
 

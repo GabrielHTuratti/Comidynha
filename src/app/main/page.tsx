@@ -17,8 +17,6 @@ import bcrypt from "bcryptjs"
 import type { IRefeicao, nutridesc, RefeicaoTipo } from "@/model/refeicao"
 import type { IUser } from "@/model/users"
 import { handleDeletarRefeicao } from "@/components/cliente/handleDeletarRefeicao"
-import refeicao, { extraCampo } from "@/model/refeicao"
-
 export default function Main() {
   const [meals, setRefeicao] = useState<IRefeicao[]>([])
   const [email, setEmail] = useState<IUser["email"] | string>("")
@@ -30,15 +28,6 @@ export default function Main() {
   })
   const [refeicaoAtual, setRefeicaoAtual] = useState<IRefeicao | null>(null)
 
-  const [campoExtraAtual, setCampoExtraAtual] = useState<extraCampo>();
-
-  const [campoExtraNovo, setCampoExtraNovo] = useState<extraCampo>({
-    campoid: "",
-    nome: "",
-    valor: "",
-  });
-
-
   const [refeicaoNova, setRefeicaoNova] = useState<Omit<IRefeicao, "_id">>({
     useremail: email,
     refid: "",
@@ -48,7 +37,9 @@ export default function Main() {
       proteinas: "",
       carboidratos: "",
       gorduras: "",
-      extra: [campoExtraNovo,],
+      extra: [{campoid: "",
+        nome: "",
+        valor: "",}],
     },
     calorias: 0,
     data: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16),
@@ -204,7 +195,9 @@ export default function Main() {
         proteinas: "",
         carboidratos: "",
         gorduras: "",
-        extra: [campoExtraNovo],
+        extra: [{campoid: "",
+          nome: "",
+          valor: "",}],
       },
       calorias: 0,
       data: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16),
@@ -217,7 +210,7 @@ export default function Main() {
     })
 
     try {
-      const response = await createMeal(mealToAdd)
+      await createMeal(mealToAdd)
     } catch (error) {
       console.error("Erro ao criar refeição:", error)
     }
@@ -234,7 +227,7 @@ export default function Main() {
     }
 
     try {
-      const response = await updateMeal(refeicaoAtual)
+      await updateMeal(refeicaoAtual)
       setRefeicao(meals.map((meal) => (meal.refid === refeicaoAtual.refid ? refeicaoAtual : meal)))
       setDialogState({ ...dialogState, isEditOpen: false })
       setRefeicaoAtual(null)
@@ -249,7 +242,7 @@ export default function Main() {
   }
 
   function callDelete(id: string): void {
-    handleDeletarRefeicao(id, meals, setRefeicao, deleteMeal, toast)
+    handleDeletarRefeicao(id, meals, setRefeicao, deleteMeal)
   }
 
   const handleAddMealWithType = (type?: RefeicaoTipo) => {
@@ -302,7 +295,7 @@ export default function Main() {
 
       <EditMealDialog
         isOpen={dialogState.isEditOpen}
-        onOpenChange={(open: any) => setDialogState({ ...dialogState, isEditOpen: open })}
+        onOpenChange={(open) => setDialogState({ ...dialogState, isEditOpen: open })}
         onEditMeal={handleEditMeal}
         refeicaoAtual={refeicaoAtual}
         updateRefeicaoAtual={updateRefeicaoAtual}

@@ -27,7 +27,7 @@ export function generateMealsPDF(meals: IRefeicao[], userName: string) {
 
   const doc = new jsPDF()
 
-  const addHeader = (pageNumber: number) => {
+  const addHeader = () => {
     doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2])
     doc.rect(0, 0, pageWidth, 20, "F")
 
@@ -64,7 +64,7 @@ export function generateMealsPDF(meals: IRefeicao[], userName: string) {
   }
 
 
-  addHeader(1)
+  addHeader()
 
 
   let yPos = 35
@@ -114,10 +114,10 @@ export function generateMealsPDF(meals: IRefeicao[], userName: string) {
 
   yPos += 10
 
-  todayMeals.forEach((meal, index) => {
+  todayMeals.forEach((meal) => {
     if (yPos > doc.internal.pageSize.height - 40) {
       doc.addPage()
-      addHeader(doc.internal.pages.length)
+      addHeader()
       yPos = 35
     }
     const cardHeight = 40 + Object.keys(meal.desc.extra || {}).length * 5
@@ -171,7 +171,7 @@ export function generateMealsPDF(meals: IRefeicao[], userName: string) {
   })
 
 
-  const result = autoTable(doc,{
+    autoTable(doc,{
     startY: yPos,
     head: [["Tipo", "Nome", "Calorias", "Horário", "Macronutrientes"]],
     body: tableData,
