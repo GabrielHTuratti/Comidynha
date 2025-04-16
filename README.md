@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🍔 Comidynha - Seu Gerenciador de Refeições Inteligente
 
-## Getting Started
+## Um projeto Next.js para gerenciar refeições de forma dinâmica, com extração de PDF e campos personalizáveis.
 
-First, run the development server:
+## 🚀 Funcionalidades
+- ✅ Adicionar refeições com macros (proteínas, carboidratos, gorduras)
+- ✅ Campos extras dinâmicos (adicione quantos quiser!)
+- ✅ Exportar para PDF (salve suas dietas facilmente)
+- ✅ Interface simples e intuitiva
+
+## 🛠 Tecnologias Usadas
+- Next.js (React + SSR)
+
+- TypeScript (Opcional, mas recomendado)
+
+- Tailwind CSS (Estilização rápida)
+
+- react-pdf / pdf-lib (Geração de PDF)
+
+- Zod / React Hook Form (Validação de formulários)
+
+## 📥 Como Usar
+Clone o repositório
+
+```bash
+git clone https://github.com/seu-usuario/comidynha.git
+cd comidynha
+```
+Instale as dependências
+
+```bash
+npm install
+```
+## ou
+```bash
+yarn install
+```
+Rode
 
 ```bash
 npm run dev
-# or
+```
+## ou
+```bash
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Configuração
+- Necessário .env.local com as seguintes variavéis: JWT_SECRET & MONGODB_URI
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Abra http://localhost:3000.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🎯 Funcionalidades Extras
+- 📄 Exportação para PDF
+Gere um PDF com os dados da sua refeição em um clique!
 
-## Learn More
+- ➕ Campos Extras Dinâmicos
+Adicione campos personalizados (como "tempo de preparo", "ingredientes", etc.) sem precisar alterar o código.
 
-To learn more about Next.js, take a look at the following resources:
+# 📸 Screenshots
+![image](https://github.com/user-attachments/assets/87204e18-fdf9-4876-93f7-e1c3ac53b768)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+![image](https://github.com/user-attachments/assets/eb194094-5f8b-449a-b5c6-483d122597e6)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+🤝 Contribuição
+Quer ajudar? Faça um fork e envie um PR!
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+👨‍💻 Feito com ❤️ por [Gabriel Turatti]
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+✨ Dica:
+Se quiser testar sem instalar, acesse Demo Online no Vercel.
+
+🍽️ Bon appétit! 🚀
