@@ -1,11 +1,8 @@
 
 import {IRefeicao } from "@/model/refeicao"
 
-const API_BASE_URL = 'http://localhost:3000/api';
-
-
 export const authenticate = async (email: string, password: string) =>{
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const response = await fetch(`${process.env.API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -24,7 +21,7 @@ export const registrar = async (data: {
   password: string;
 } ) => {
     console.log(JSON.stringify(data));
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    const response = await fetch(`${process.env.API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -38,7 +35,7 @@ export const registrar = async (data: {
     return response.json();
 }
 export const getServices = async () => {
-  const jsonServices = await fetch(`${API_BASE_URL}/electricians/getServices`, {
+  const jsonServices = await fetch(`${process.env.API_BASE_URL}/electricians/getServices`, {
     method: 'GET',
     credentials: 'include',
     cache: 'no-store'
@@ -46,7 +43,7 @@ export const getServices = async () => {
   return jsonServices;
 }
 export const getProfile = async () => {
-  const profile = await fetch(`${API_BASE_URL}/auth/user`, {
+  const profile = await fetch(`${process.env.API_BASE_URL}/auth/user`, {
     method: 'GET',
     credentials: 'include',
     cache: 'no-store',
@@ -60,7 +57,7 @@ export const getProfile = async () => {
 export const createMeal = async (meals: IRefeicao) => {
   console.log("testando:" + meals);
 
-  const response = await fetch(`${API_BASE_URL}/refeicao`, {
+  const response = await fetch(`${process.env.API_BASE_URL}/refeicao`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json'
@@ -75,7 +72,7 @@ export const createMeal = async (meals: IRefeicao) => {
 }
 export const updateMeal = async (meals: IRefeicao) => {
   console.log("testando edit:" + meals.tipo);
-  const response = await fetch(`${API_BASE_URL}/refeicao`, {
+  const response = await fetch(`${process.env.API_BASE_URL}/refeicao`, {
     method: "PUT",
     headers: {
       'Content-Type': 'application/json'
@@ -91,7 +88,7 @@ export const updateMeal = async (meals: IRefeicao) => {
 
 export const deleteMeal = async (meals: IRefeicao) => {
   console.log("testando:" + meals);
-  const response = await fetch(`${API_BASE_URL}/refeicao`, {
+  const response = await fetch(`${process.env.API_BASE_URL}/refeicao`, {
     method: "DELETE",
     headers: {
       'Content-Type': 'application/json'
@@ -106,7 +103,7 @@ export const deleteMeal = async (meals: IRefeicao) => {
 }
 
 export const getMeals = async () => {
-  const response = await fetch(`${API_BASE_URL}/refeicao`,{
+  const response = await fetch(`${process.env.API_BASE_URL}/refeicao`,{
     method: "GET",
     headers: {
       "Content-Type": "application/json"
