@@ -16,7 +16,7 @@ export const authenticate = async (email: string, password: string) =>{
     return response.json();
 }
 export const registrar = async (email:string, name:string, password:string) => {
-    let data = {email, name, password}
+    const data = {email, name, password}
     console.log(JSON.stringify(data));
     const response = await fetch(`${process.env.API_BASE_URL}/auth/register`, {
         method: 'POST',
