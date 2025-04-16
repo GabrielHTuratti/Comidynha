@@ -4,8 +4,14 @@ import jwt from 'jsonwebtoken';
 import User from '@/model/users';
 import dbConnect from '@/lib/db';
 import bcrypt from 'bcryptjs';
+import { z } from 'zod';
 
-
+const loginScheme = z.object({
+  email: z.string()
+    .email({ message: "Isso não é um e-mail" }),
+  password: z.string()
+    .min(6, { message: "Senha deve ter pelo menos 6 caracteres" })
+});
 
 
 export async function POST(request: Request) {
@@ -13,6 +19,16 @@ export async function POST(request: Request) {
   console.log(email, password);
   try{
     await dbConnect();
+    const validatedData = loginScheme.safeParse({email, password});
+        if (!validatedData.success) {
+          return NextResponse.json(
+            { 
+              error: "Dados inválidos",
+              details: validatedData.error.errors[0].message
+            },
+            { status: 400 }
+          );
+        }
     const user = await User.findOne({email: email}).select('+password')
     if(!user) return NextResponse.json(
       { error: 'Credenciais inválidas' },

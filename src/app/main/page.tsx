@@ -65,14 +65,11 @@ export default function Main() {
   }, [])
 
   const updateRefeicaoNova = (updates: Omit<IRefeicao, "_id">) => {
-    setRefeicaoNova((prev) => ({ ...prev, ...updates }))
+    setRefeicaoNova({...refeicaoNova, ...updates })
   }
 
   const updateRefeicaoNovaDesc = (updates: nutridesc) => {
-    setRefeicaoNova((prev) => ({
-      ...prev,
-      desc: { ...prev.desc, ...updates },
-    }))
+    setRefeicaoNova({...refeicaoNova, desc: updates})
   }
 
   const updateRefeicaoNovaExtra = (campoid: string, novoNome: string, novoValor: string) => {

@@ -28,12 +28,12 @@ export async function POST(request: Request) {
     const body = await request.json();
     console.log(body);
     const validatedData = registerSchema.safeParse(body);
-    
+    console.log(validatedData.error?.errors[0].message)
     if (!validatedData.success) {
       return NextResponse.json(
         { 
           error: "Dados inválidos",
-          details: validatedData.error.issues 
+          details: validatedData.error.errors[0].message
         },
         { status: 400 }
       );

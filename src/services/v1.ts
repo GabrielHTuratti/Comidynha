@@ -14,9 +14,10 @@ export const authenticate = async (email: string, password: string) =>{
         credentials: 'include',
     });
     if(!response.ok){
-        throw new Error(`Erro ao fazer login => ${response.json()}`)
+        throw new Error(`${await response.json().then(data => {return data.error;})}`)
     }
-    return response.json();
+    const retorno = await response.json();
+    return retorno;
 }
 export const registrar = async (email:string, name:string, password:string) => {
     const data = {email, name, password}
@@ -30,17 +31,10 @@ export const registrar = async (email:string, name:string, password:string) => {
         credentials: 'include',
     });
     if(!response.ok){
-        throw new Error(`Erro ao registrar => ${response.json()}`)
+        throw new Error(`${await response.json().then(data => {return data.details;})}`)
     };
-    return response.json();
-}
-export const getServices = async () => {
-  const jsonServices = await fetch(`${API}/electricians/getServices`, {
-    method: 'GET',
-    credentials: 'include',
-    cache: 'no-store'
-  });
-  return jsonServices;
+    const retorno = await response.json();
+    return retorno;
 }
 export const getProfile = async () => {
   const profile = await fetch(`${API}/auth/user`, {
@@ -48,9 +42,8 @@ export const getProfile = async () => {
     credentials: 'include',
     cache: 'no-store',
   });
-  if(!profile.ok) throw new Error(`Erro ao buscar perfil => ${profile.json()}`)
+  if(!profile.ok) throw new Error(`${await profile.json().then(data => {return data.error;})}`)
     const data = await profile.json()
-    console.log("testando" + data)
     return data.user;
 }
 
@@ -66,9 +59,10 @@ export const createMeal = async (meals: IRefeicao) => {
     credentials: 'include',
   })
   if(!response.ok){
-    throw new Error(`Erro ao salvar refeição => ${response.json()}`)
+    throw new Error(`${await response.json().then(data => {return data.details;})}`)
   }
-  return response.json();
+  const retorno = await response.json();
+  return retorno;
 }
 export const updateMeal = async (meals: IRefeicao) => {
   console.log("testando edit:" + meals.tipo);
@@ -81,9 +75,10 @@ export const updateMeal = async (meals: IRefeicao) => {
     credentials: 'include',
   })
   if(!response.ok){
-    throw new Error(`Erro ao salvar refeição => ${response.json()}`)
+    throw new Error(`${await response.json().then(data => {return data.details;})}`)
   }
-  return response.json();
+  const retorno = await response.json();
+  return retorno;
 }
 
 export const deleteMeal = async (meals: IRefeicao) => {
@@ -97,9 +92,10 @@ export const deleteMeal = async (meals: IRefeicao) => {
     credentials: 'include',
   })
   if(!response.ok){
-    throw new Error(`Erro ao salvar refeição => ${response.json()}`)
+    throw new Error(`${await response.json().then(data => {return data.details;})}`)
   }
-  return response.json();
+  const retorno = await response.json();
+  return retorno;
 }
 
 export const getMeals = async () => {
@@ -110,8 +106,9 @@ export const getMeals = async () => {
     },
     credentials: 'include'
   })
-  if(!response.ok) throw new Error(`Erro ao salvar refeição => ${response.json()}`)
+  if(!response.ok) throw new Error(`${await response.json().then(data => {return data.details;})}`)
   
-  return response.json();
+    const retorno = await response.json();
+    return retorno;
 
 }

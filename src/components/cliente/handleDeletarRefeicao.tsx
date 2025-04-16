@@ -2,6 +2,7 @@
 import { IRefeicao } from "@/model/refeicao"
 import { confirmToast } from "./confirmarButton"
 import { toast } from "../ui/use-toast"
+import { getMeals } from "@/services/v1"
 
 export const handleDeletarRefeicao = async (
     id: string,
@@ -14,14 +15,16 @@ export const handleDeletarRefeicao = async (
       "Tem certeza que deseja remover esta refeição?",
       async () => {
         try {
-          const updatedMeals = meals.filter((meal) => meal.refid !== id)
-          const deletedMeals = meals.filter((meal) => meal.refid === id)
   
-          for (const meal of deletedMeals) {
-            await deleteMeal(meal)
+          const mealtoDelete = meals.find((meal) => meal.refid === id)
+          if(mealtoDelete){
+            await deleteMeal(mealtoDelete);
           }
   
-          setRefeicao(updatedMeals)
+          setRefeicao(meals.filter((meal) => meal.refid !== id))
+
+          await getMeals()
+
           toast({
             title: "Refeição removida",
             description: "Sua refeição foi removida com sucesso.",
