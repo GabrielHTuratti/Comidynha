@@ -12,7 +12,6 @@ interface PDFExportButtonProps {
 
 export function PDFExportButton({ meals, userName }: PDFExportButtonProps) {
   const handleExportPDF = () => {
-    alert(meals + "-" + userName);
     generateMealsPDF(meals, userName)
   }
 
