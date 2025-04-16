@@ -21,7 +21,7 @@ interface AddMealDialogProps {
   refeicaoNova: Omit<IRefeicao, "_id">
   updateRefeicaoNova: (updates: Omit<IRefeicao, "_id">) => void
   updateRefeicaoNovaDesc: (updates: nutridesc) => void
-  updateRefeicaoNovaExtra: (key: string, value: string) => void
+  updateRefeicaoNovaExtra: (id:string, key: string, value: string) => void
   removeRefeicaoNovaExtra: (key: string) => void
   addNewExtraField: () => void
 }
@@ -82,25 +82,22 @@ export function AddMealDialog({
                 />
               </div>
 
-              {Object.entries(refeicaoNova.desc.extra || {}).map(([key, value], index) => (
-                <div key={index} className="grid grid-cols-3 gap-2 items-end">
+              {refeicaoNova.desc.extra?.map((campo) => (
+                <div key={campo.campoid} className="grid grid-cols-3 gap-2 items-end">
                   <div className="grid gap-2">
                     <Label>Nome</Label>
                     <Input
-                      value={key}
+                      value={campo.nome}
                       onChange={(e) => {
-                        const newKey = e.target.value
-                        const newValue = value
-                        removeRefeicaoNovaExtra(key)
-                        updateRefeicaoNovaExtra(newKey, newValue)
+                        updateRefeicaoNovaExtra(campo.campoid, e.target.value, campo.valor)
                       }}
                     />
                   </div>
                   <div className="grid gap-2">
                     <Label>Valor</Label>
-                    <Input value={value} onChange={(e) => updateRefeicaoNovaExtra(key, e.target.value)} />
+                    <Input value={campo.valor} onChange={(e) => updateRefeicaoNovaExtra(campo.campoid, campo.nome, e.target.value)} />
                   </div>
-                  <Button variant="destructive" onClick={() => removeRefeicaoNovaExtra(key)}>
+                  <Button variant="destructive" onClick={() => removeRefeicaoNovaExtra(campo.campoid)}>
                     Remover
                   </Button>
                 </div>

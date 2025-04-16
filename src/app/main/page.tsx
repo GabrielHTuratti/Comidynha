@@ -17,6 +17,7 @@ import bcrypt from "bcryptjs"
 import type { IRefeicao, nutridesc, RefeicaoTipo } from "@/model/refeicao"
 import type { IUser } from "@/model/users"
 import { handleDeletarRefeicao } from "@/components/cliente/handleDeletarRefeicao"
+import refeicao, { extraCampo } from "@/model/refeicao"
 
 export default function Main() {
   const [meals, setRefeicao] = useState<IRefeicao[]>([])
@@ -29,6 +30,15 @@ export default function Main() {
   })
   const [refeicaoAtual, setRefeicaoAtual] = useState<IRefeicao | null>(null)
 
+  const [campoExtraAtual, setCampoExtraAtual] = useState<extraCampo>();
+
+  const [campoExtraNovo, setCampoExtraNovo] = useState<extraCampo>({
+    campoid: "",
+    nome: "",
+    valor: "",
+  });
+
+
   const [refeicaoNova, setRefeicaoNova] = useState<Omit<IRefeicao, "_id">>({
     useremail: email,
     refid: "",
@@ -38,10 +48,10 @@ export default function Main() {
       proteinas: "",
       carboidratos: "",
       gorduras: "",
-      extra: {},
+      extra: [campoExtraNovo,],
     },
     calorias: 0,
-    data: new Date().toISOString().slice(0, 16),
+    data: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16),
     tipo: "cafe-da-manha",
   })
 
@@ -74,53 +84,74 @@ export default function Main() {
     }))
   }
 
-  const updateRefeicaoNovaExtra = (key: string, value: string) => {
-    setRefeicaoNova((prev) => ({
-      ...prev,
+  const updateRefeicaoNovaExtra = (campoid: string, novoNome: string, novoValor: string) => {
+    const novosExtras = (refeicaoNova.desc.extra || []).map(campo => 
+      campo.campoid === campoid ? { ...campo, nome: novoNome, valor: novoValor } : campo
+    );
+  
+    setRefeicaoNova({
+      ...refeicaoNova,
       desc: {
-        ...prev.desc,
-        extra: {
-          ...prev.desc.extra,
-          [key]: value,
-        },
+        ...refeicaoNova.desc,
+        extra: novosExtras,
       },
-    }))
-  }
+    });
+  };
 
-  const updateRefeicaoAtualExtra = (key: string, value: string) => {
-    if (!refeicaoAtual) return
-    setRefeicaoAtual((prev) => {
-      if (!prev) return null
-      return { ...prev, desc: { ...prev.desc, extra: { ...prev.desc.extra, [key]: value } } }
-    })
-  }
-
-  const removeRefeicaoNovaExtra = (key: string) => {
-    setRefeicaoNova((prev) => {
-      const newExtra = { ...prev.desc.extra }
-      delete newExtra[key]
-      return {
-        ...prev,
-        desc: {
-          ...prev.desc,
-          extra: newExtra,
-        },
-      }
-    })
-  }
-
+  
   const addNewExtraField = () => {
-    setRefeicaoNova((prev) => ({
-      ...prev,
+    const novoCampo = { campoid: Date.now().toString(), nome: "", valor: "" };
+    
+    setRefeicaoNova({
+      ...refeicaoNova,
       desc: {
-        ...prev.desc,
-        extra: {
-          ...prev.desc.extra,
-          [`novo-campo-${Date.now()}`]: "",
-        },
+        ...refeicaoNova.desc,
+        extra: [...(refeicaoNova.desc.extra || []), novoCampo],
       },
-    }))
-  }
+    });
+  };
+
+  const updateRefeicaoAtualExtra= (campoid: string, novoNome: string, novoValor: string) => {
+    if (!refeicaoAtual) return;
+  
+    const novosExtras = (refeicaoAtual.desc.extra || []).map(campo =>
+      campo.campoid === campoid ? { ...campo, nome: novoNome, valor: novoValor } : campo
+    );
+  
+    setRefeicaoAtual({
+      ...refeicaoAtual,
+      desc: {
+        ...refeicaoAtual.desc,
+        extra: novosExtras,
+      },
+    });
+  };
+
+  const removeRefeicaoNovaExtra = (campoid: string) => {
+    const novosExtras = (refeicaoNova.desc.extra || []).filter(campo => campo.campoid !== campoid);
+    setRefeicaoNova({
+      ...refeicaoNova,
+      desc: {
+        ...refeicaoNova.desc,
+        extra: novosExtras,
+      },
+    });
+  };
+
+  const removeRefeicaoAtualExtra = (campoid: string) => {
+    if (!refeicaoAtual) return;
+  
+    const novosExtras = (refeicaoAtual.desc.extra || []).filter(campo => campo.campoid !== campoid);
+  
+    setRefeicaoAtual({
+      ...refeicaoAtual,
+      desc: {
+        ...refeicaoAtual.desc,
+        extra: novosExtras,
+      },
+    });
+  };
+
 
   const updateRefeicaoAtual = (updates: React.SetStateAction<IRefeicao | null>) => {
     if (!refeicaoAtual) return
@@ -139,40 +170,19 @@ export default function Main() {
     })
   }
 
-  const removeRefeicaoAtualExtra = (key: string) => {
-    if (!refeicaoAtual) return
-    setRefeicaoAtual((prev) => {
-      if (!prev) return null
-      const newExtra = { ...prev.desc.extra }
-      delete newExtra[key]
-      return {
-        ...prev,
-        desc: {
-          ...prev.desc,
-          extra: newExtra,
-        },
-      }
-    })
-  }
-
   const addCurrentExtraField = () => {
-    if (!refeicaoAtual) return
-
-    setRefeicaoAtual((prev) => {
-      if (!prev) return null
-
-      return {
-        ...prev,
-        desc: {
-          ...prev.desc,
-          extra: {
-            ...prev.desc.extra,
-            [`campo-${Date.now()}`]: "",
-          },
-        },
-      }
-    })
-  }
+    if (!refeicaoAtual) return;
+  
+    const novoCampo = { campoid: Date.now().toString(), nome: "", valor: "" };
+    
+    setRefeicaoAtual({
+      ...refeicaoAtual,
+      desc: {
+        ...refeicaoAtual.desc,
+        extra: [...(refeicaoAtual.desc.extra || []), novoCampo],
+      },
+    });
+  };
 
   const handleAddMeal = async () => {
     const newId = await bcrypt.genSalt(18)
@@ -194,7 +204,7 @@ export default function Main() {
         proteinas: "",
         carboidratos: "",
         gorduras: "",
-        extra: {},
+        extra: [campoExtraNovo],
       },
       calorias: 0,
       data: new Date().toISOString().slice(0, 16),
@@ -297,8 +307,8 @@ export default function Main() {
         refeicaoAtual={refeicaoAtual}
         updateRefeicaoAtual={updateRefeicaoAtual}
         updateRefeicaoAtualDesc={updateRefeicaoAtualDesc}
-        updateRefeicaoAtualExtra={updateRefeicaoAtualExtra}
         removeRefeicaoAtualExtra={removeRefeicaoAtualExtra}
+        updateRefeicaoAtualExtra={updateRefeicaoAtualExtra}
         addCurrentExtraField={addCurrentExtraField}
       />
 

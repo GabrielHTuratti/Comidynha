@@ -150,7 +150,7 @@ export default function Home() {
                 <div className="space-y-2">
                   <h3 className="text-xl font-bold">3. Gestão Completa</h3>
                   <p className="text-muted-foreground">
-                    Edição ou exclusão de refeições com um clique, Histórico completo para acompanhamento nutricional
+                    Edição ou exclusão de refeições com um clique, possibilidade de conversão em PDF para praticidades!
                   </p>
                 </div>
               </div>

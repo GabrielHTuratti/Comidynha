@@ -41,9 +41,9 @@ export function MealCard({ meal, onEdit, onDelete }: MealCardProps) {
             {meal.desc.gorduras !== undefined && <CardDescription>Gorduras: {meal.desc.gorduras}g</CardDescription>}
             {meal.desc.extra && typeof meal.desc.extra === "object" && (
               <>
-                {Object.entries(meal.desc.extra).map(([extraKey, extraValue], index) => (
-                  <CardDescription key={`extra-${index}`}>
-                    {extraKey}: {extraValue}g
+                {meal.desc.extra?.map((campo) => (
+                  <CardDescription key={`extra-${campo.campoid}`}>
+                    {campo.nome}: {campo.valor}
                   </CardDescription>
                 ))}
               </>

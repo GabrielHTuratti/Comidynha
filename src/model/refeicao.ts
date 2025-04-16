@@ -2,11 +2,17 @@ import mongoose, { ObjectId, Schema } from 'mongoose';
 
 export type RefeicaoTipo = "cafe-da-manha" | "almoco" | "lanche-da-tarde" | "janta"
 
+export interface extraCampo{
+  campoid: string,
+  nome: string,
+  valor: string,
+}
+
 export interface nutridesc {
   proteinas?: string,
   carboidratos?: string,
   gorduras?: string,
-  extra?: Record<string, string>
+  extra?: extraCampo[]
 }
 
 

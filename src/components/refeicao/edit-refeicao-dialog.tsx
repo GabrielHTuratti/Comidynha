@@ -24,10 +24,11 @@ interface EditMealDialogProps {
   refeicaoAtual: IRefeicao | null
   updateRefeicaoAtual: (updates: SetStateAction<IRefeicao | null>) => void
   updateRefeicaoAtualDesc: (updates: nutridesc) => void
-  updateRefeicaoAtualExtra: (key: string, value: string) => void
+  updateRefeicaoAtualExtra: (id:string, newkey: string, newvalue: string) => void
   removeRefeicaoAtualExtra: (key: string) => void
   addCurrentExtraField: () => void
 }
+
 
 export function EditMealDialog({
   isOpen,
@@ -36,8 +37,8 @@ export function EditMealDialog({
   refeicaoAtual,
   updateRefeicaoAtual,
   updateRefeicaoAtualDesc,
-  updateRefeicaoAtualExtra,
   removeRefeicaoAtualExtra,
+  updateRefeicaoAtualExtra,
   addCurrentExtraField,
 }: EditMealDialogProps) {
   return (
@@ -81,25 +82,25 @@ export function EditMealDialog({
                 onChange={(e) => updateRefeicaoAtualDesc({ carboidratos: e.target.value })}
               />
             </div>
-            {Object.entries(refeicaoAtual.desc.extra || {}).map(([extraKey, extraValue], index) => (
-              <div key={index} className="grid grid-cols-3 gap-2 items-end">
+            {refeicaoAtual.desc.extra?.map((campo) => (
+              <div key={campo.campoid} className="grid grid-cols-3 gap-2 items-end">
                 <div className="grid gap-2">
                   <Label>Nome</Label>
                   <Input
-                    value={extraKey}
+                    value={campo.nome}
                     onChange={(e) => {
-                      const newKey = e.target.value
-                      const newValue = extraValue
-                      removeRefeicaoAtualExtra(extraKey)
-                      updateRefeicaoAtualExtra(newKey, newValue)
+                      updateRefeicaoAtualExtra(campo.campoid, e.target.value, campo.valor)
                     }}
                   />
                 </div>
                 <div className="grid gap-2">
                   <Label>Valor</Label>
-                  <Input value={extraValue} onChange={(e) => updateRefeicaoAtualExtra(extraKey, e.target.value)} />
+                  <Input value={campo.valor} onChange={(e) => {
+                    updateRefeicaoAtualExtra(campo.campoid, campo.nome, e.target.value);
+                  }}
+                />
                 </div>
-                <Button variant="destructive" onClick={() => removeRefeicaoAtualExtra(extraKey)}>
+                <Button variant="destructive" onClick={() => removeRefeicaoAtualExtra(campo.campoid)}>
                   Remover
                 </Button>
               </div>
