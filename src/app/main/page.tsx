@@ -34,9 +34,9 @@ export default function Main() {
     nome: "",
     favorito: false,
     desc: {
-      proteinas: "",
-      carboidratos: "",
-      gorduras: "",
+      proteinas: "0",
+      carboidratos: "0",
+      gorduras: "0",
       extra: [{campoid: "",
         nome: "",
         valor: "",}],
@@ -68,9 +68,15 @@ export default function Main() {
     setRefeicaoNova({...refeicaoNova, ...updates })
   }
 
-  const updateRefeicaoNovaDesc = (updates: nutridesc) => {
-    setRefeicaoNova({...refeicaoNova, desc: updates})
-  }
+  const updateRefeicaoNovaDesc = (newDesc: Partial<typeof refeicaoNova.desc>) => {
+    setRefeicaoNova(prev => ({
+      ...prev,
+      desc: {
+        ...prev.desc,
+        ...newDesc
+      }
+    }));
+  };
 
   const updateRefeicaoNovaExtra = (campoid: string, novoNome: string, novoValor: string) => {
     const novosExtras = (refeicaoNova.desc.extra || []).map(campo => 
@@ -189,9 +195,9 @@ export default function Main() {
       nome: "",
       favorito: false,
       desc: {
-        proteinas: "",
-        carboidratos: "",
-        gorduras: "",
+        proteinas: "0",
+        carboidratos: "0",
+        gorduras: "0",
         extra: [{campoid: "",
           nome: "",
           valor: "",}],
