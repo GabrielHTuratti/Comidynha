@@ -47,14 +47,8 @@ export default function CustomerAuthPage() {
     setRegisterError("")
     setRegisterLoading(true)
 
-    const registrationData = {
-      email: registerEmail,
-      name: registerNome,
-      password: registerSenha
-    }
-
     try {
-      await registrar(registrationData);
+      await registrar(registerEmail, registerNome, registerSenha);
       router.push("/main")
     } catch (error) {
       setRegisterError(`Erro de registro: ${error instanceof Error ? error.message : String(error)}`)
