@@ -2,7 +2,7 @@
 import {IRefeicao } from "@/model/refeicao"
 
 
-const API = process.env.API_BASE_URL
+const API = process.env.NEXT_PUBLIC_API_BASE_URL
 
 export const authenticate = async (email: string, password: string) =>{
     const response = await fetch(`${API}/auth/login`, {
