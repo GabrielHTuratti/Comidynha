@@ -63,19 +63,32 @@ export async function POST(request: Request) {
       password: password
     });
 
-    const token = jwt.sign(
-      { userId: newUser._id, email: newUser.email },
-      process.env.JWT_SECRET!,
-      { expiresIn: '7d' }
-    );
+    const refreshToken = jwt.sign({
+      userId: newUser._id,
+      tokenVersion: newUser.tokenVersion}, process.env.REFRESH_TOKEN!,{expiresIn: '1d'})
 
-    (await cookies()).set('auth_token', token, {
+    const acessToken = jwt.sign({email: newUser.email, name: newUser.name,
+      userId: newUser._id}, process.env.JWT_SECRET!,{expiresIn: '30m'})
+
+    const activeSessions = new Set<string>();
+    activeSessions.add(acessToken);
+    activeSessions.add(refreshToken);
+
+    (await cookies()).set('auth_token', acessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 24 * 7, // 7 dias
+      maxAge: 60 * 60 * 0.5, // 30m
       path: '/',
       sameSite: 'strict'
     });
+
+    (await cookies()).set('rfs_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24, // 1 day
+      path: '/',
+    });
+
 
     return NextResponse.json({
       success: true,

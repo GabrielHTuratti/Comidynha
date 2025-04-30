@@ -17,6 +17,8 @@ export const authenticate = async (email: string, password: string) =>{
         throw new Error(`${await response.json().then(data => {return data.error;})}`)
     }
     const retorno = await response.json();
+    window.location.href = "/main";
+
     return retorno;
 }
 export const registrar = async (email:string, name:string, password:string) => {
@@ -34,6 +36,8 @@ export const registrar = async (email:string, name:string, password:string) => {
         throw new Error(`${await response.json().then(data => {return data.details;})}`)
     };
     const retorno = await response.json();
+    window.location.href = "/main";
+
     return retorno;
 }
 export const getProfile = async () => {
@@ -46,7 +50,6 @@ export const getProfile = async () => {
     const data = await profile.json()
     return data.user;
 }
-
 export const createMeal = async (meals: IRefeicao) => {
   console.log("testando:" + meals);
 
@@ -80,7 +83,6 @@ export const updateMeal = async (meals: IRefeicao) => {
   const retorno = await response.json();
   return retorno;
 }
-
 export const deleteMeal = async (meals: IRefeicao) => {
   console.log("testando:" + meals);
   const response = await fetch(`${API}/refeicao`, {
@@ -97,7 +99,6 @@ export const deleteMeal = async (meals: IRefeicao) => {
   const retorno = await response.json();
   return retorno;
 }
-
 export const getMeals = async () => {
   const response = await fetch(`${API}/refeicao`,{
     method: "GET",
@@ -111,4 +112,22 @@ export const getMeals = async () => {
     const retorno = await response.json();
     return retorno;
 
+}
+export const logout = async () => {
+  const response = await fetch(`${API}/auth/logout`, {
+    method: "POST",
+    headers: {"Content-Type" : "application/json"},
+    credentials: 'include'
+  })
+  if(!response.ok) throw new Error(`${await response.json().then(data => {return data.details;})}`)
+
+    window.location.href = "/auth/customer";
+  }
+export const refresh = async () => {
+  const response = await fetch(`${API}/auth/refresh`, {
+    method: "POST",
+    headers: {"Content-Type" : "application/json"},
+    credentials: 'include'
+  })
+  if(!response.ok) throw new Error(`${await response.json().then(data => {return data.details;})}`)
 }

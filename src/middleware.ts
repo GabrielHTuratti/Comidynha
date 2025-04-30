@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
 import {jwtVerify} from 'jose';
+import User from '@/model/users';
+import db from './lib/db';
 
 export async function middleware(request: NextRequest) {
   const { pathname, origin } = request.nextUrl;
@@ -10,39 +12,52 @@ export async function middleware(request: NextRequest) {
   if (publicPaths.includes(pathname)) {
     return NextResponse.next();
   }
-
-  let isAuthenticated = false;
   try {
-    const token = (await cookies()).get('auth_token')?.value;
-    
-    if (token) {
+
+    const acessToken = (await cookies()).get('auth_token')?.value;
+    if (acessToken) {
       const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-      await jwtVerify(token, secret);
-      isAuthenticated = true;
+      await jwtVerify(acessToken, secret);
+      return NextResponse.next();
     }
+
+    const refreshToken = (await cookies()).get('rfs_token')?.value;
+    if(refreshToken){
+      const secret = new TextEncoder().encode(process.env.REFRESH_TOKEN);
+      let {payload} = await jwtVerify(refreshToken, secret);
+      if(!payload.tokenVersion || !payload.userId){
+        throw new Error("Token inválido");
+      }
+      if (pathname.startsWith('/main') || pathname.startsWith('/api')) {
+        const redirectUrl = NextResponse.redirect(new URL('/api/auth/refresh', origin))
+        redirectUrl.cookies.set('redirect_url', pathname);
+        return redirectUrl;
+      }
+
+      return NextResponse.next();
+    }
+    throw new Error("Não autenticado");
   } catch (error) {
     console.error('Erro na verificação do token:', error);
-    isAuthenticated = false;
-  }
+    if (pathname.startsWith('/api/refeicao')) {
+      return NextResponse.json(
+        { error: 'Não autorizado' },
+        { status: 401 }
+      );
 
-  if (pathname.startsWith('/main') && !isAuthenticated) {
-    const redirectUrl = new URL('/auth/customer', origin);
-    redirectUrl.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(redirectUrl);
-  }
+    }
+    if (pathname.startsWith('/main')) {
+      const redirectUrl = new URL('/auth/customer', origin);
+      redirectUrl.searchParams.set('redirect', pathname);
 
-  if (pathname.startsWith('/auth') && isAuthenticated) {
-    return NextResponse.redirect(new URL('/main', origin));
-  }
+      const response = NextResponse.redirect(redirectUrl);
+      response.cookies.delete('auth_token')
+      response.cookies.delete('rfs_token');
 
-  if (pathname.startsWith('/api/refeicao') && !isAuthenticated) {
-    return NextResponse.json(
-      { error: 'Não autorizado' },
-      { status: 401 }
-    );
+      return response;
+    }
+    return NextResponse.next();
   }
-
-  return NextResponse.next();
 }
 
 export const config = {

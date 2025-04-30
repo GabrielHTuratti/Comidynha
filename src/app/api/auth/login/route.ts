@@ -42,14 +42,26 @@ export async function POST(request: Request) {
       { error: 'Credenciais inválidas' },
       { status: 401 }
     );
-    const sessionToken = jwt.sign({email: user.email,
-      userId: user._id}, process.env.JWT_SECRET!,{expiresIn: '1d'})
+    const refreshToken = jwt.sign({
+      userId: user._id,
+      tokenVersion: user.tokenVersion}, process.env.REFRESH_TOKEN!,{expiresIn: '1d'})
+
+    const acessToken = jwt.sign({email: user.email, name: user.name,
+      userId: user._id}, process.env.JWT_SECRET!,{expiresIn: '30m'})
     
     const activeSessions = new Set<string>();
-    activeSessions.add(sessionToken);
+    activeSessions.add(acessToken);
+    activeSessions.add(refreshToken);
 
 
-    (await cookies()).set('auth_token', sessionToken, {
+    (await cookies()).set('auth_token', acessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 0.5, // 30m
+      path: '/',
+    });
+
+    (await cookies()).set('rfs_token', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       maxAge: 60 * 60 * 24, // 1 day

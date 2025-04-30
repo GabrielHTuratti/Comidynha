@@ -4,13 +4,9 @@ import dbConnect from '@/lib/db';
 import Meal from '@/model/refeicao';
 import { cookies } from 'next/headers';
 
-
-process.env.JWT_SECRET = "G@BR!3LTUR4TT1D3V3L0P3RJUN10RF1N2NCY4PP";
-
 export async function GET() {
   try {
-    const cookieStore = cookies();
-    const token = (await cookieStore).get('auth_token')?.value;
+    const token = (await cookies()).get('auth_token')?.value;
     console.log("token valor: " + token)
     if (!token) {
       return NextResponse.json(

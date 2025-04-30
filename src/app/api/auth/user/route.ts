@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 import IUser from '@/model/users'; 
 import { dbConnect } from '@/lib/db';
+import { jwtVerify } from 'jose';
 
 
 
@@ -20,13 +21,11 @@ export async function GET() {
       );
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      userId: string,
-      email: string,
-    }
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const {payload} = await jwtVerify(token, secret)
 
 
-    if (!decoded.email) {
+    if (!payload.email) {
       return NextResponse.json(
         { error: 'Token inválido' },
         { status: 401 }
@@ -35,7 +34,7 @@ export async function GET() {
 
     await dbConnect();
 
-    const user = await IUser.findOne({ email: decoded.email })
+    const user = await IUser.findOne({ email: payload.email })
       .select('-password -__v');
     
 

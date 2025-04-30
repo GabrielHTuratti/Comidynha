@@ -59,20 +59,6 @@ export default function CustomerAuthPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b bg-[#F36280] text-white">
-        <div className="container flex items-center justify-between h-16 px-4 md:px-6">
-          <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
-            <Utensils className="h-6 w-6 text-emerald-500" />
-            <span>Comidynha</span>
-          </Link>
-          <nav className="hidden md:flex gap-6">
-            <Link href="/" className="text-sm font-medium hover:underline underline-offset-4">
-              Como Funciona
-            </Link>
-          </nav>
-        </div>
-      </header>
-
       <main className="flex-1 flex items-center justify-center bg-background px-4 py-12">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">

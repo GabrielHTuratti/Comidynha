@@ -1,10 +1,12 @@
 import { Schema, model, models } from 'mongoose';
 import bcrypt from 'bcryptjs';
+import { string } from 'zod';
 
 export interface IUser {
   _id?: string;
   name: string;
   email: string;
+  tokenVersion: number;
   password: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -30,6 +32,10 @@ export const userSchema = new Schema<IUser>({
     required: [true, 'Senha é obrigatória'],
     select: false
   },
+  tokenVersion: {
+    type: Number,
+    default: 0
+  }
 }, { 
   timestamps: true 
 });

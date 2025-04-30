@@ -5,41 +5,6 @@ import {Utensils } from "lucide-react"
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="border-b bg-[#F36280] text-white">
-        <div className="container flex items-center justify-between h-16 px-4 md:px-6">
-          <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
-            <Utensils className="h-6 w-6 text-emerald-500" />
-            <span>Comydinha</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/auth/customer" className="text-sm font-medium hover:underline underline-offset-4">
-              Cadastrar
-            </Link>
-            <Button asChild className="bg-[#F9C900]">
-              <Link href="/auth/customer">Logar</Link>
-            </Button>
-            <Button variant="outline" size="icon" className="md:hidden">
-              <span className="sr-only">Menu</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-6 w-6"
-              >
-                <line x1="4" x2="20" y1="12" y2="12" />
-                <line x1="4" x2="20" y1="6" y2="6" />
-                <line x1="4" x2="20" y1="18" y2="18" />
-              </svg>
-            </Button>
-          </div>
-        </div>
-      </header>
       <main className="flex-1">
         <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-primary/10 to-background">
           <div className="container px-4 md:px-6">
@@ -50,7 +15,7 @@ export default function Home() {
                     Faça o planejamento de suas refeições diáras!
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Cadastre-se no nosso site e comece já a fazer o planejamento de suas refeições diárias, de forma prática e rapida!
+                    Experimente a versão demo! Cadastre-se no nosso site e comece já a fazer o planejamento de suas refeições diárias, de forma prática e rapida!
                   </p>
                 </div>
               </div>
