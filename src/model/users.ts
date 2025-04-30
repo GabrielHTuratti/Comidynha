@@ -1,6 +1,5 @@
 import { Schema, model, models } from 'mongoose';
 import bcrypt from 'bcryptjs';
-import { string } from 'zod';
 
 export interface IUser {
   _id?: string;

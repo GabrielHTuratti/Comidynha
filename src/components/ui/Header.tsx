@@ -22,6 +22,7 @@ export default function Header() {
         const profile = await getProfile();
         setName(profile.name);
       } catch (error) {
+        console.log(error);
         setName(null);
       }
     };

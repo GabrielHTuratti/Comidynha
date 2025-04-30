@@ -1,5 +1,4 @@
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
 import {Utensils } from "lucide-react"
 
 export default function Home() {

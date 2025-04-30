@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
 import {jwtVerify} from 'jose';
-import User from '@/model/users';
-import db from './lib/db';
 
 export async function middleware(request: NextRequest) {
   const { pathname, origin } = request.nextUrl;
@@ -24,7 +22,7 @@ export async function middleware(request: NextRequest) {
     const refreshToken = (await cookies()).get('rfs_token')?.value;
     if(refreshToken){
       const secret = new TextEncoder().encode(process.env.REFRESH_TOKEN);
-      let {payload} = await jwtVerify(refreshToken, secret);
+      const {payload} = await jwtVerify(refreshToken, secret);
       if(!payload.tokenVersion || !payload.userId){
         throw new Error("Token inválido");
       }

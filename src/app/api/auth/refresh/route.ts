@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({error: "Não autorizado"}, {status: 401});
         }
         const secret = new TextEncoder().encode(process.env.REFRESH_TOKEN);        
-        let {payload} = await jwtVerify(refreshToken, secret);
+        const {payload} = await jwtVerify(refreshToken, secret);
         
         const user = await User.findOne({ where: { _id: payload.userId } });
         if(!user || payload.tokenVersion !== user.tokenVersion){
