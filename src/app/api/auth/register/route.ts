@@ -51,8 +51,8 @@ export async function POST(request: Request) {
     }
 
 
-    const fixedSalt = '$2b$10$FixedSaltValue00000000000'; // Must be 29 chars, starting with $2b$10$
-    const hashedPassword = await bcrypt.hash(password, fixedSalt);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt); 
     const teste = await bcrypt.compare(password, hashedPassword);
     console.log(teste + '\n' + hashedPassword);
 
@@ -76,17 +76,20 @@ export async function POST(request: Request) {
 
     (await cookies()).set('auth_token', acessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 0.5, // 30m
+      secure: true,
+      maxAge: 60 * 30, // 30m
       path: '/',
-      sameSite: 'strict'
+      sameSite: 'none',
+      domain: '.comidynha.vercel.app'
     });
 
     (await cookies()).set('rfs_token', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: true,
       maxAge: 60 * 60 * 24, // 1 day
       path: '/',
+      sameSite: 'none',
+      domain: '.comidynha.vercel.app'
     });
 
 

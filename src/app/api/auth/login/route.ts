@@ -56,16 +56,20 @@ export async function POST(request: Request) {
 
     (await cookies()).set('auth_token', acessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 0.5, // 30m
+      secure: true,
+      maxAge: 60 * 30, // 30m
       path: '/',
+      sameSite: 'none',
+      domain: '.comidynha.vercel.app'
     });
 
     (await cookies()).set('rfs_token', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: true,
       maxAge: 60 * 60 * 24, // 1 day
       path: '/',
+      sameSite: 'none',
+      domain: '.comidynha.vercel.app'
     });
 
     return NextResponse.json(
