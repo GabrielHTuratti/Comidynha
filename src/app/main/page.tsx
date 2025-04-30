@@ -256,32 +256,45 @@ export default function Main() {
   }
 
   return (
-    <div className="container py-6 px-4 md:px-6">
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Bem vindo! {name}</h1>
-            <p className="text-muted-foreground">Gerencie suas refeições e acompanhe suas calorias diárias.</p>
-          </div>
-          <div className="flex gap-2">
+    <div className="w-full max-w-[1920px] mx-auto px-3 sm:px-4 md:px-5 lg:px-6 xl:px-8 2xl:px-10 py-4 sm:py-5 md:py-6">
+      <div className="flex flex-col gap-4 sm:gap-5 md:gap-6">
+      <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center gap-3 sm:gap-4">          <div>
+        <div className="space-y-1">
+            <h1 className="text-2xl xs:text-2xl sm:text-3xl font-bold tracking-tight">
+              Bem vindo! {name}
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Gerencie suas refeições e acompanhe suas calorias diárias.
+            </p>
+        </div>
+        
+          <div className="flex flex-col xs:flex-row gap-2 w-full xs:w-auto">
             <PDFExportButton meals={meals} userName={name} />
-            <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => handleAddMealWithType()}>
-              <Plus className="mr-2 h-4 w-4" /> Adicionar Refeição
+            <Button 
+              className="bg-emerald-600 hover:bg-emerald-700 whitespace-nowrap"
+              onClick={() => handleAddMealWithType()}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              <span className="text-xs sm:text-sm">Adicionar Refeição</span>
             </Button>
           </div>
         </div>
 
-        <MealStats meals={meals} />
+        <div className="w-full">
+          <MealStats meals={meals} />
+        </div>
 
-        <MealTabs
-          meals={meals}
-          onEdit={(meal) => {
-            setRefeicaoAtual(meal)
-            setDialogState({ ...dialogState, isEditOpen: true })
-          }}
-          onDelete={callDelete}
-          onAddMeal={handleAddMealWithType}
-        />
+        <div className="w-full">
+          <MealTabs
+            meals={meals}
+            onEdit={(meal) => {
+              setRefeicaoAtual(meal)
+              setDialogState({ ...dialogState, isEditOpen: true })
+            }}
+            onDelete={callDelete}
+            onAddMeal={handleAddMealWithType}
+          />
+        </div>
       </div>
 
       <AddMealDialog
@@ -309,6 +322,7 @@ export default function Main() {
       />
 
       <Toaster />
-    </div>
+      </div>
+    </div>  
   )
 }

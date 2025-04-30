@@ -20,8 +20,6 @@ const registerSchema = z.object({
     .regex(/[0-9]/, { message: "Senha deve conter pelo menos 1 número" })
 });
 
- 
-
 export async function POST(request: Request) {
   try {
     await dbConnect();

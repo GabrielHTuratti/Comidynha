@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import { IsoStringToDate, dateToIsoString } from "@/lib/utils-refeicao"
 import type { IRefeicao, nutridesc, RefeicaoTipo } from "@/model/refeicao"
+import { useRefeicaoValidation } from "@/hooks/use-refeicaoValidation"
 
 interface AddMealDialogProps {
   isOpen: boolean
@@ -37,6 +38,26 @@ export function AddMealDialog({
   removeRefeicaoNovaExtra,
   addNewExtraField,
 }: AddMealDialogProps) {
+
+  const {errors, validateField, validateForm, validateExtraField, validateAllExtras} = useRefeicaoValidation();
+
+  const handleAddMeal = () => {
+    if(validateForm(refeicaoNova)){
+      onAddMeal();
+    }
+  }
+
+  const handleFieldChange = (field: string, value: any) => {
+    updateRefeicaoNova({ ...refeicaoNova, [field]: value });
+    validateField(field, value);
+  };
+
+  const handleDescChange = (field: string, value: any) => {
+    const newDesc = { ...refeicaoNova.desc, [field]: value };
+    updateRefeicaoNovaDesc(newDesc);
+    validateField(`desc.${field}`, value);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] flex flex-col">
@@ -49,10 +70,13 @@ export function AddMealDialog({
             <Label htmlFor="name">Nome</Label>
             <Input
               id="name"
+              maxLength={51}
               value={refeicaoNova.nome}
-              onChange={(e) => updateRefeicaoNova({ ...refeicaoNova, nome: e.target.value })}
+              onChange={(e) => handleFieldChange('nome', e.target.value)}
               placeholder="Ex: Salada com frango grelhado"
             />
+            {errors.nome && <p className="text-sm text-red-500">{errors.nome}</p>}
+
           </div>
           <div className="grid gap-2">
             <Label>Informações Nutricionais</Label>
@@ -60,49 +84,117 @@ export function AddMealDialog({
               <div className="grid gap-2">
                 <Label>Proteínas (g)</Label>
                 <Input
-                  type="number"
                   value={refeicaoNova.desc.proteinas}
-                  onChange={(e) => updateRefeicaoNovaDesc({ proteinas: e.target.value })}
+                  max={99999999999}
+                  type="number"
+                  onKeyDown={(e) => {
+                    if (!/[0-9]|Backspace|Tab|Delete|ArrowLeft|ArrowRight/.test(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
+                  inputMode="numeric"
+                  onChange={(e) =>{
+                    const value = e.target.value;
+                    if (value.length <= 11) { 
+                      handleDescChange('proteinas', value);
+                    }
+                  }}
                 />
+                {errors['desc.proteinas'] && <p className="text-sm text-red-500">{errors['desc.proteinas']}</p>}
               </div>
               <div className="grid gap-2">
                 <Label>Carboidratos (g)</Label>
                 <Input
-                  type="number"
                   value={refeicaoNova.desc.carboidratos}
-                  onChange={(e) => updateRefeicaoNovaDesc({ carboidratos: e.target.value })}
+                  max={99999999999}
+                  type="number"
+                  onKeyDown={(e) => {
+                    if (!/[0-9]|Backspace|Tab|Delete|ArrowLeft|ArrowRight/.test(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
+                  inputMode="numeric"
+                  onChange={(e) =>{
+                    const value = e.target.value;
+                    if (value.length <= 11) { 
+                      handleDescChange('carboidratos', value);
+                    }
+                  }}
                 />
+                {errors['desc.carboidratos'] && <p className="text-sm text-red-500">{errors['desc.carboidratos']}</p>}
               </div>
               <div className="grid gap-2">
                 <Label>Gorduras (g)</Label>
                 <Input
-                  type="number"
                   value={refeicaoNova.desc.gorduras}
-                  onChange={(e) => updateRefeicaoNovaDesc({ gorduras: e.target.value })}
+                  max={99999999999}
+                  type="number"
+                  onKeyDown={(e) => {
+                    if (!/[0-9]|Backspace|Tab|Delete|ArrowLeft|ArrowRight/.test(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
+                  inputMode="numeric"
+                  onChange={(e) =>{
+                    const value = e.target.value;
+                    if (value.length <= 11) { 
+                      handleDescChange('gorduras', value);
+                    }
+                  }}
                 />
+                {errors['desc.gorduras'] && <p className="text-sm text-red-500">{errors['desc.gorduras']}</p>}
               </div>
 
-              {refeicaoNova.desc.extra?.map((campo) => (
+              {refeicaoNova.desc.extra?.map((campo, index) => (
                 <div key={campo.campoid} className="grid grid-cols-3 gap-2 items-end">
                   <div className="grid gap-2">
                     <Label>Nome</Label>
                     <Input
                       value={campo.nome}
                       onChange={(e) => {
-                        updateRefeicaoNovaExtra(campo.campoid, e.target.value, campo.valor)
-                      }}
+                      updateRefeicaoNovaExtra(campo.campoid, e.target.value, campo.valor);
+                      validateExtraField(
+                        { ...campo, nome: e.target.value },
+                        index
+                      );
+                    }}
                     />
+                    {errors[`extra.${index}.nome`] && (
+                      <p className="text-sm text-red-500">{errors[`extra.${index}.nome`]}</p>
+                    )}
                   </div>
                   <div className="grid gap-2">
                     <Label>Valor</Label>
-                    <Input value={campo.valor} onChange={(e) => updateRefeicaoNovaExtra(campo.campoid, campo.nome, e.target.value)} />
+                    <Input 
+                      value={campo.valor} 
+                      onChange={(e) => {
+                        updateRefeicaoNovaExtra(campo.campoid, campo.nome, e.target.value);
+                        validateExtraField(
+                          { ...campo, valor: e.target.value },
+                          index
+                        );
+                      }} 
+                    />
+                    {errors[`extra.${index}.valor`] && (
+                    <p className="text-sm text-red-500">{errors[`extra.${index}.valor`]}</p>
+                  )}
                   </div>
-                  <Button variant="destructive" onClick={() => removeRefeicaoNovaExtra(campo.campoid)}>
+                  <Button variant="destructive" onClick={() => {
+                    removeRefeicaoNovaExtra(campo.campoid);
+                    setTimeout(() => validateAllExtras(
+                      refeicaoNova.desc.extra?.filter(e => e.campoid !== campo.campoid)
+                    ));
+                  }}>
                     Remover
                   </Button>
                 </div>
               ))}
-              <Button variant="outline" onClick={addNewExtraField}>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  addNewExtraField();
+                  setTimeout(() => validateAllExtras(refeicaoNova.desc.extra));
+                }}>
                 Adicionar Campo Extra
               </Button>
             </div>
@@ -111,11 +203,24 @@ export function AddMealDialog({
             <Label htmlFor="calorias">Calorias</Label>
             <Input
               id="calorias"
-              type="number"
               value={refeicaoNova.calorias || ""}
-              onChange={(e) => updateRefeicaoNova({ ...refeicaoNova, calorias: Number.parseInt(e.target.value) || 0 })}
               placeholder="Ex: 350"
+              max={99999999999}
+              type="number"
+              onKeyDown={(e) => {
+                if (!/[0-9]|Backspace|Tab|Delete|ArrowLeft|ArrowRight/.test(e.key)) {
+                  e.preventDefault();
+                }
+              }}
+              inputMode="numeric"
+              onChange={(e) =>{
+                const value = e.target.value;
+                if (value.length <= 11) { 
+                  handleFieldChange('calorias', parseInt(value));
+                }
+            }}
             />
+            {errors.calorias && <p className="text-sm text-red-500">{errors.calorias}</p>}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="datetime">Data e Hora</Label>
@@ -123,14 +228,15 @@ export function AddMealDialog({
               id="datetime"
               type="datetime-local"
               value={IsoStringToDate(refeicaoNova.data)}
-              onChange={(e) => updateRefeicaoNova({ ...refeicaoNova, data: dateToIsoString(e.target.value) })}
+              onChange={(e) => handleFieldChange('data', dateToIsoString(e.target.value))}
             />
+            {errors.data && <p className="text-sm text-red-500">{errors.data}</p>}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="type">Tipo de Refeição</Label>
             <Select
               value={refeicaoNova.tipo}
-              onValueChange={(value) => updateRefeicaoNova({ ...refeicaoNova, tipo: value as RefeicaoTipo })}
+              onValueChange={(value) => handleFieldChange('tipo', value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o tipo" />
@@ -142,16 +248,18 @@ export function AddMealDialog({
                 <SelectItem value="janta">Janta</SelectItem>
               </SelectContent>
             </Select>
+            {errors.tipo && <p className="text-sm text-red-500">{errors.tipo}</p>}
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" 
+          onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
           <Button
             className="bg-emerald-600 hover:bg-emerald-700"
-            onClick={onAddMeal}
-            disabled={!refeicaoNova.nome || !refeicaoNova.calorias}
+            onClick={handleAddMeal}
+            disabled={Object.values(errors).some(error => error !== undefined)}
           >
             Adicionar
           </Button>

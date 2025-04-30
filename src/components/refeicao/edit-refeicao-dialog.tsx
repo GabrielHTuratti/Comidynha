@@ -15,6 +15,7 @@ import {
 import { IsoStringToDate, dateToIsoString } from "@/lib/utils-refeicao"
 import type { IRefeicao, nutridesc, RefeicaoTipo } from "@/model/refeicao"
 import type { SetStateAction } from "react"
+import { useRefeicaoValidation } from "@/hooks/use-refeicaoValidation"
 
 interface EditMealDialogProps {
   isOpen: boolean
@@ -40,6 +41,28 @@ export function EditMealDialog({
   updateRefeicaoAtualExtra,
   addCurrentExtraField,
 }: EditMealDialogProps) {
+
+  const { errors, validateField, validateForm, validateAllExtras, validateExtraField} = useRefeicaoValidation();
+
+  const handleEditMeal = () => {
+    if (refeicaoAtual && validateForm(refeicaoAtual)) {
+      onEditMeal();
+    }
+  };
+
+  const handleFieldChange = (field: string, value: any) => {
+    if (!refeicaoAtual) return;
+    updateRefeicaoAtual({ ...refeicaoAtual, [field]: value });
+    validateField(field, value);
+  };
+
+  const handleDescChange = (field: string, value: any) => {
+    if (!refeicaoAtual) return;
+    const newDesc = { ...refeicaoAtual.desc, [field]: value };
+    updateRefeicaoAtualDesc(newDesc);
+    validateField(`desc.${field}`, value);
+  };
+  
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] flex flex-col">
@@ -53,35 +76,74 @@ export function EditMealDialog({
               <Label htmlFor="edit-name">Nome</Label>
               <Input
                 id="edit-name"
-                value={refeicaoAtual.nome}
-                onChange={(e) => updateRefeicaoAtual({ ...refeicaoAtual, nome: e.target.value })}
+                maxLength={51}
+                placeholder={refeicaoAtual.nome}
+                onChange={(e) => handleFieldChange('nome', e.target.value)}
               />
+              {errors.nome && <p className="text-sm text-red-500">{errors.nome}</p>}
+
             </div>
             <div className="grid gap-2">
               <Label htmlFor="edit-desc">Descrição Nutricional</Label>
               <Label htmlFor="edit-gordura">Gordura</Label>
               <Input
                 id="edit-gordura"
-                type="number"
                 value={refeicaoAtual.desc.gorduras}
-                onChange={(e) => updateRefeicaoAtualDesc({ gorduras: e.target.value })}
+                max={99999999999}
+                type="number"
+                onKeyDown={(e) => {
+                  if (!/[0-9]|Backspace|Tab|Delete|ArrowLeft|ArrowRight/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                inputMode="numeric"
+                onChange={(e) =>{
+                  const value = e.target.value;
+                  if (value.length <= 11) { 
+                    handleDescChange('gorduras', value);
+                  }
+                }}
               />
+              {errors['desc.gorduras'] && <p className="text-sm text-red-500">{errors['desc.gorduras']}</p>}
               <Label htmlFor="edit-prot">Proteina</Label>
               <Input
-                id="edit-prot"
-                type="number"
                 value={refeicaoAtual.desc.proteinas}
-                onChange={(e) => updateRefeicaoAtualDesc({ proteinas: e.target.value })}
+                max={99999999999}
+                type="number"
+                onKeyDown={(e) => {
+                  if (!/[0-9]|Backspace|Tab|Delete|ArrowLeft|ArrowRight/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                inputMode="numeric"
+                onChange={(e) =>{
+                  const value = e.target.value;
+                  if (value.length <= 11) { 
+                    handleDescChange('proteinas', value);
+                  }
+                }}
               />
+              {errors['desc.proteinas'] && <p className="text-sm text-red-500">{errors['desc.proteinas']}</p>}
               <Label htmlFor="edit-carb">Carboidrato</Label>
               <Input
-                id="edit-carb"
-                type="number"
                 value={refeicaoAtual.desc.carboidratos}
-                onChange={(e) => updateRefeicaoAtualDesc({ carboidratos: e.target.value })}
+                max={99999999999}
+                type="number"
+                onKeyDown={(e) => {
+                  if (!/[0-9]|Backspace|Tab|Delete|ArrowLeft|ArrowRight/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                inputMode="numeric"
+                onChange={(e) =>{
+                  const value = e.target.value;
+                  if (value.length <= 11) { 
+                    handleDescChange('carboidratos', value);
+                  }}}
               />
+              {errors['desc.carboidratos'] && <p className="text-sm text-red-500">{errors['desc.carboidratos']}</p>}
             </div>
-            {refeicaoAtual.desc.extra?.map((campo) => (
+            {refeicaoAtual.desc.extra?.map((campo, index) => (
               <div key={campo.campoid} className="grid grid-cols-3 gap-2 items-end">
                 <div className="grid gap-2">
                   <Label>Nome</Label>
@@ -89,15 +151,29 @@ export function EditMealDialog({
                     value={campo.nome}
                     onChange={(e) => {
                       updateRefeicaoAtualExtra(campo.campoid, e.target.value, campo.valor)
+                      validateExtraField(
+                        { ...campo, nome: e.target.value },
+                        index
+                      );
                     }}
                   />
+                  {errors[`extra.${index}.nome`] && (
+                      <p className="text-sm text-red-500">{errors[`extra.${index}.nome`]}</p>
+                    )}
                 </div>
                 <div className="grid gap-2">
                   <Label>Valor</Label>
                   <Input value={campo.valor} onChange={(e) => {
                     updateRefeicaoAtualExtra(campo.campoid, campo.nome, e.target.value);
-                  }}
+                    validateExtraField(
+                      { ...campo, valor: e.target.value },
+                      index
+                    );
+                  }} 
                 />
+                {errors[`extra.${index}.valor`] && (
+                    <p className="text-sm text-red-500">{errors[`extra.${index}.valor`]}</p>
+                  )}
                 </div>
                 <Button variant="destructive" onClick={() => removeRefeicaoAtualExtra(campo.campoid)}>
                   Remover
@@ -111,28 +187,41 @@ export function EditMealDialog({
             <div className="grid gap-2">
               <Label htmlFor="edit-calorias">Calorias</Label>
               <Input
-                id="edit-calorias"
-                type="number"
+                id="calorias"
                 value={refeicaoAtual.calorias || ""}
-                onChange={(e) =>
-                  updateRefeicaoAtual({ ...refeicaoAtual, calorias: Number.parseInt(e.target.value) || 0 })
-                }
+                placeholder="Ex: 350"
+                max={99999999999}
+                type="number"
+                onKeyDown={(e) => {
+                  if (!/[0-9]|Backspace|Tab|Delete|ArrowLeft|ArrowRight/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                inputMode="numeric"
+                onChange={(e) =>{
+                  const value = e.target.value;
+                  if (value.length <= 11) { 
+                    handleFieldChange('calorias', parseInt(value));
+                  }
+              }}
               />
-            </div>
+              {errors.calorias && <p className="text-sm text-red-500">{errors.calorias}</p>}
+              </div>
             <div className="grid gap-2">
               <Label htmlFor="edit-datetime">Data e Hora</Label>
               <Input
                 id="edit-datetime"
                 type="datetime-local"
                 value={IsoStringToDate(refeicaoAtual.data)}
-                onChange={(e) => updateRefeicaoAtual({ ...refeicaoAtual, data: dateToIsoString(e.target.value) })}
+                onChange={(e) => handleFieldChange('data', dateToIsoString(e.target.value))}
               />
+              {errors.data && <p className="text-sm text-red-500">{errors.data}</p>}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="edit-type">Tipo de Refeição</Label>
               <Select
                 value={refeicaoAtual.tipo}
-                onValueChange={(value) => updateRefeicaoAtual({ ...refeicaoAtual, tipo: value as RefeicaoTipo })}
+                onValueChange={(value) => handleFieldChange('tipo', value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o tipo" />
@@ -144,6 +233,7 @@ export function EditMealDialog({
                   <SelectItem value="janta">Janta</SelectItem>
                 </SelectContent>
               </Select>
+              {errors.tipo && <p className="text-sm text-red-500">{errors.tipo}</p>}
             </div>
           </div>
         )}
@@ -153,8 +243,8 @@ export function EditMealDialog({
           </Button>
           <Button
             className="bg-emerald-600 hover:bg-emerald-700"
-            onClick={onEditMeal}
-            disabled={!refeicaoAtual?.nome || !refeicaoAtual?.calorias}
+            onClick={handleEditMeal}
+            disabled={Object.values(errors).some(error => error !== undefined)}
           >
             Salvar Alterações
           </Button>
