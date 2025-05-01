@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { IsoStringToDate, dateToIsoString } from "@/lib/utils-refeicao"
-import type { IRefeicao, nutridesc, RefeicaoTipo } from "@/model/refeicao"
+import type { IRefeicao, nutridesc } from "@/model/refeicao"
 import { useRefeicaoValidation } from "@/hooks/use-refeicaoValidation"
 
 interface AddMealDialogProps {
@@ -47,12 +47,12 @@ export function AddMealDialog({
     }
   }
 
-  const handleFieldChange = (field: string, value: any) => {
+  const handleFieldChange = (field: string, value: string) => {
     updateRefeicaoNova({ ...refeicaoNova, [field]: value });
     validateField(field, value);
   };
 
-  const handleDescChange = (field: string, value: any) => {
+  const handleDescChange = (field: string, value: string) => {
     const newDesc = { ...refeicaoNova.desc, [field]: value };
     updateRefeicaoNovaDesc(newDesc);
     validateField(`desc.${field}`, value);
@@ -216,7 +216,7 @@ export function AddMealDialog({
               onChange={(e) =>{
                 const value = e.target.value;
                 if (value.length <= 11) { 
-                  handleFieldChange('calorias', parseInt(value));
+                  handleFieldChange('calorias', value);
                 }
             }}
             />

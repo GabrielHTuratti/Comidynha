@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Clock, Flame } from "lucide-react"
 import type { IRefeicao } from "@/model/refeicao"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Pie, Cell, PieChart } from 'recharts'
-import refeicao from "@/model/refeicao"
 
 interface MealStatsProps {
   meals: IRefeicao[]
@@ -39,8 +38,6 @@ export function MealStats({ meals }: MealStatsProps) {
       }).length
     }
   })
-
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042']
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { IsoStringToDate, dateToIsoString } from "@/lib/utils-refeicao"
-import type { IRefeicao, nutridesc, RefeicaoTipo } from "@/model/refeicao"
+import type { IRefeicao, nutridesc } from "@/model/refeicao"
 import type { SetStateAction } from "react"
 import { useRefeicaoValidation } from "@/hooks/use-refeicaoValidation"
 
@@ -50,13 +50,13 @@ export function EditMealDialog({
     }
   };
 
-  const handleFieldChange = (field: string, value: any) => {
+  const handleFieldChange = (field: string, value: string) => {
     if (!refeicaoAtual) return;
     updateRefeicaoAtual({ ...refeicaoAtual, [field]: value });
     validateField(field, value);
   };
 
-  const handleDescChange = (field: string, value: any) => {
+  const handleDescChange = (field: string, value: string) => {
     if (!refeicaoAtual) return;
     const newDesc = { ...refeicaoAtual.desc, [field]: value };
     updateRefeicaoAtualDesc(newDesc);
@@ -180,10 +180,14 @@ export function EditMealDialog({
                 </Button>
               </div>
             ))}
-
-            <Button variant="outline" onClick={addCurrentExtraField}>
-              Adicionar Campo Extra
-            </Button>
+                <Button 
+                variant="outline" 
+                onClick={() => {
+                  addCurrentExtraField();
+                  setTimeout(() => validateAllExtras(refeicaoAtual.desc.extra));
+                }}>
+                Adicionar Campo Extra
+              </Button>
             <div className="grid gap-2">
               <Label htmlFor="edit-calorias">Calorias</Label>
               <Input
@@ -201,7 +205,7 @@ export function EditMealDialog({
                 onChange={(e) =>{
                   const value = e.target.value;
                   if (value.length <= 11) { 
-                    handleFieldChange('calorias', parseInt(value));
+                    handleFieldChange('calorias', value);
                   }
               }}
               />

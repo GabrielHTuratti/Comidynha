@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {z} from "zod"
-import type { extraCampo, IRefeicao, nutridesc } from "@/model/refeicao";
+import type { extraCampo, IRefeicao } from "@/model/refeicao";
 
 export const extraCampoSchema = z.object({
     campoid: z.string(),
@@ -37,7 +37,7 @@ refid: z.string().optional(),
 nome: z.string().max(50, { message: "Nome não pode exceder 50 caracteres" }),
 favorito: z.boolean().default(false),
 desc: nutridescSchema,
-calorias: z.number().min(0),
+calorias: z.string().min(0).max(10),
 tipo: refeicaoTipoSchema
 });
 
