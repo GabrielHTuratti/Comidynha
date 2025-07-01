@@ -12,6 +12,7 @@ export const confirmToast = (
   }) => void,
   mensagem: string,
   onConfirm: () => void,
+  onDecline: () => void
 ) => {
   return toast({
     title: "Confirmação",
@@ -27,6 +28,15 @@ export const confirmToast = (
             }}
           >
             Confirmar
+          </Button>
+          <Button
+            size="sm"
+            className="bg-red-600 hover:bg-red-700 text-white"
+            onClick={() => {
+              onDecline()
+            }}
+          >
+            Cancelar
           </Button>
         </div>
       </div>

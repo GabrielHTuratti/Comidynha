@@ -5,7 +5,7 @@ import User from '@/model/users';
 
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
     try{
         const refreshToken = (await cookies()).get('rfs_token')?.value;
         const redirectURL = request.cookies.get("redirect_url")?.value || "/main";
@@ -47,6 +47,7 @@ export async function POST(request: NextRequest) {
             secure: process.env.NODE_ENV === 'production',
             maxAge: 60 * 60 * 0.5, // 30m
             path: '/',
+            domain: 'localhost'
         });
 
         activeSessions.add(newRefreshToken);
@@ -55,6 +56,7 @@ export async function POST(request: NextRequest) {
             secure: process.env.NODE_ENV === 'production',
             maxAge: 60 * 60 * 24, // 1 day
             path: '/',
+            domain: 'localhost'
         });
 
         return response;

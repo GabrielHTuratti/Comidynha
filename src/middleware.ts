@@ -6,8 +6,8 @@ import {jwtVerify} from 'jose';
 export async function middleware(request: NextRequest) {
   const { pathname, origin } = request.nextUrl;
   
-  const publicPaths = ['/auth'];
-  if (publicPaths.includes(pathname)) {
+  const publicPaths = '/auth';
+  if (pathname.includes(publicPaths)) {
     return NextResponse.next();
   }
   try {

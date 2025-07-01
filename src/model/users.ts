@@ -5,6 +5,8 @@ export interface IUser {
   _id?: string;
   name: string;
   email: string;
+  plan?: string;
+  reflimite?: boolean;
   tokenVersion: number;
   password: string;
   createdAt?: Date;

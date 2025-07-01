@@ -33,7 +33,10 @@ export default function CustomerAuthPage() {
     setLoginError("")
     setIsLoginLoading(true)
     try {
-      await authenticate(loginEmail, loginSenha);
+      const response = await authenticate(loginEmail, loginSenha);
+      if(response != 200){
+        throw new Error("Algo de errado naõ esta certo")
+      }
       router.push("/main")
     } catch (error) {
       setLoginError(`Erro de autenticação: ${error instanceof Error ? error.message : String(error)}`)
@@ -177,20 +180,6 @@ export default function CustomerAuthPage() {
           </Tabs>
         </div>
       </main>
-
-      <footer className="border-t mt-auto bg-[#b4436c] text-white">
-        <div className="container flex flex-col gap-6 py-8 md:flex-row md:items-center md:justify-between md:py-12">
-          <div className="flex pl-4 items-center gap-2">
-            <Utensils className="h-6 w-6 text-emerald-500" />
-            <span className="text-lg font-semibold">Comydinha</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="#" className="text-sm font-medium hover:underline underline-offset-4">
-              © 2025 Comydinha. Todos os direitos reservados.
-            </Link>
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }
