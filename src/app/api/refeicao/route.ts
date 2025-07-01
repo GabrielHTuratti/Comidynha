@@ -27,7 +27,6 @@ export async function GET() {
     }
     await dbConnect();
     const meals = await Meal.find({ useremail: decoded.email });
-    console.log("teste aaaaaaaa " + meals)
     return NextResponse.json(meals);
 
   } catch (error) {
@@ -66,7 +65,8 @@ export async function DELETE(request: Request) {
   try{
     await dbConnect();
     const body = await request.json();
-    const meal = await Meal.findByIdAndDelete(body._id);
+    console.log(body)
+    const meal = await Meal.findOneAndDelete({refid: (body.refid)});
     console.log(meal);
     return NextResponse.json(meal, { status: 201 });
   }catch(err){

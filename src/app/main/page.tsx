@@ -5,18 +5,19 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
-import { toast } from "@/components/ui/use-toast"
-import { Toaster } from "@/components/ui/toaster"
+import { toast } from "sonner"
 import { MealStats } from "@/components/refeicao/refeicao-stats"
 import { MealTabs } from "@/components/refeicao/refeicao-tabs"
 import { AddMealDialog } from "@/components/refeicao/add-refeicao-dialog"
 import { EditMealDialog } from "@/components/refeicao/edit-refeicao-dialog"
 import { PDFExportButton } from "@/components/refeicao/pdf-export-button"
+import { IntelligentMealForm } from "@/components/intelligent-meal/intelligent-meal-form"
 import { createMeal, getMeals, deleteMeal, updateMeal, getProfile } from "@/services/v1"
 import bcrypt from "bcryptjs"
 import type { IRefeicao, nutridesc, RefeicaoTipo } from "@/model/refeicao"
 import type { IUser } from "@/model/users"
 import { handleDeletarRefeicao } from "@/components/cliente/handleDeletarRefeicao"
+
 export default function Main() {
   const [meals, setRefeicao] = useState<IRefeicao[]>([])
   const [email, setEmail] = useState<IUser["email"] | string>("")
@@ -37,9 +38,7 @@ export default function Main() {
       proteinas: "0",
       carboidratos: "0",
       gorduras: "0",
-      extra: [{campoid: "",
-        nome: "",
-        valor: "",}],
+      extra: [{ campoid: "", nome: "", valor: "" }],
     },
     calorias: 0,
     data: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16),
@@ -65,87 +64,85 @@ export default function Main() {
   }, [])
 
   const updateRefeicaoNova = (updates: Omit<IRefeicao, "_id">) => {
-    setRefeicaoNova({...refeicaoNova, ...updates })
+    setRefeicaoNova({ ...refeicaoNova, ...updates })
   }
 
   const updateRefeicaoNovaDesc = (newDesc: Partial<typeof refeicaoNova.desc>) => {
-    setRefeicaoNova(prev => ({
+    setRefeicaoNova((prev) => ({
       ...prev,
       desc: {
         ...prev.desc,
-        ...newDesc
-      }
-    }));
-  };
+        ...newDesc,
+      },
+    }))
+  }
 
   const updateRefeicaoNovaExtra = (campoid: string, novoNome: string, novoValor: string) => {
-    const novosExtras = (refeicaoNova.desc.extra || []).map(campo => 
-      campo.campoid === campoid ? { ...campo, nome: novoNome, valor: novoValor } : campo
-    );
-  
+    const novosExtras = (refeicaoNova.desc.extra || []).map((campo) =>
+      campo.campoid === campoid ? { ...campo, nome: novoNome, valor: novoValor } : campo,
+    )
+
     setRefeicaoNova({
       ...refeicaoNova,
       desc: {
         ...refeicaoNova.desc,
         extra: novosExtras,
       },
-    });
-  };
+    })
+  }
 
-  
   const addNewExtraField = () => {
-    const novoCampo = { campoid: Date.now().toString(), nome: "", valor: "" };
-    
+    const novoCampo = { campoid: Date.now().toString(), nome: "", valor: "" }
+
     setRefeicaoNova({
       ...refeicaoNova,
       desc: {
         ...refeicaoNova.desc,
         extra: [...(refeicaoNova.desc.extra || []), novoCampo],
       },
-    });
-  };
+    })
+  }
 
-  const updateRefeicaoAtualExtra= (campoid: string, novoNome: string, novoValor: string) => {
-    if (!refeicaoAtual) return;
-  
-    const novosExtras = (refeicaoAtual.desc.extra || []).map(campo =>
-      campo.campoid === campoid ? { ...campo, nome: novoNome, valor: novoValor } : campo
-    );
-  
+  const updateRefeicaoAtualExtra = (campoid: string, novoNome: string, novoValor: string) => {
+    if (!refeicaoAtual) return
+
+    const novosExtras = (refeicaoAtual.desc.extra || []).map((campo) =>
+      campo.campoid === campoid ? { ...campo, nome: novoNome, valor: novoValor } : campo,
+    )
+
     setRefeicaoAtual({
       ...refeicaoAtual,
       desc: {
         ...refeicaoAtual.desc,
         extra: novosExtras,
       },
-    });
-  };
+    })
+  }
 
   const removeRefeicaoNovaExtra = (campoid: string) => {
-    const novosExtras = (refeicaoNova.desc.extra || []).filter(campo => campo.campoid !== campoid);
+    const novosExtras = (refeicaoNova.desc.extra || []).filter((campo) => campo.campoid !== campoid)
     setRefeicaoNova({
       ...refeicaoNova,
       desc: {
         ...refeicaoNova.desc,
         extra: novosExtras,
       },
-    });
-  };
+    })
+  }
 
   const removeRefeicaoAtualExtra = (campoid: string) => {
-    if (!refeicaoAtual) return;
-  
-    const novosExtras = (refeicaoAtual.desc.extra || []).filter(campo => campo.campoid !== campoid);
-  
+    if (!refeicaoAtual) return
+
+    const novosExtras = (refeicaoAtual.desc.extra || []).filter((campo) => campo.campoid !== campoid)
+
     setRefeicaoAtual({
       ...refeicaoAtual,
       desc: {
         ...refeicaoAtual.desc,
         extra: novosExtras,
       },
-    });
-  };
-
+    })
+  }
 
   const updateRefeicaoAtual = (updates: React.SetStateAction<IRefeicao | null>) => {
     if (!refeicaoAtual) return
@@ -165,18 +162,18 @@ export default function Main() {
   }
 
   const addCurrentExtraField = () => {
-    if (!refeicaoAtual) return;
-  
-    const novoCampo = { campoid: Date.now().toString(), nome: "", valor: "" };
-    
+    if (!refeicaoAtual) return
+
+    const novoCampo = { campoid: Date.now().toString(), nome: "", valor: "" }
+
     setRefeicaoAtual({
       ...refeicaoAtual,
       desc: {
         ...refeicaoAtual.desc,
         extra: [...(refeicaoAtual.desc.extra || []), novoCampo],
       },
-    });
-  };
+    })
+  }
 
   const handleAddMeal = async () => {
     const newId = await bcrypt.genSalt(18)
@@ -198,19 +195,14 @@ export default function Main() {
         proteinas: "0",
         carboidratos: "0",
         gorduras: "0",
-        extra: [{campoid: "",
-          nome: "",
-          valor: "",}],
+        extra: [{ campoid: "", nome: "", valor: "" }],
       },
       calorias: 0,
       data: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16),
       tipo: "cafe-da-manha",
     })
 
-    toast({
-      title: "Refeição adicionada",
-      description: "Sua refeição foi adicionada com sucesso.",
-    })
+    toast.success("Refeição adicionada com sucesso!")
 
     try {
       await createMeal(mealToAdd)
@@ -221,11 +213,7 @@ export default function Main() {
 
   const handleEditMeal = async () => {
     if (!refeicaoAtual) {
-      toast({
-        title: "Erro",
-        description: "Nenhuma refeição selecionada para edição",
-        variant: "destructive",
-      })
+      toast.error("Nenhuma refeição selecionada para edição")
       return
     }
 
@@ -235,13 +223,21 @@ export default function Main() {
       setDialogState({ ...dialogState, isEditOpen: false })
       setRefeicaoAtual(null)
 
-      toast({
-        title: "Refeição atualizada",
-        description: "Sua refeição foi atualizada com sucesso.",
-      })
+      toast.success("Refeição atualizada com sucesso!")
     } catch (error) {
       console.error("Erro ao atualizar refeição:", error)
     }
+  }
+
+  // Função para lidar com dados detectados pela IA
+  const handleMealDetected = (mealData: Partial<IRefeicao>) => {
+    setRefeicaoNova((prev) => ({
+      ...prev,
+      ...mealData,
+      useremail: email,
+      refid: prev.refid,
+    }))
+    setDialogState({ ...dialogState, isAddOpen: true })
   }
 
   function callDelete(id: string): void {
@@ -258,71 +254,69 @@ export default function Main() {
   return (
     <div className="w-full max-w-[1920px] mx-auto px-3 sm:px-4 md:px-5 lg:px-6 xl:px-8 2xl:px-10 py-4 sm:py-5 md:py-6">
       <div className="flex flex-col gap-4 sm:gap-5 md:gap-6">
-      <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center gap-3 sm:gap-4">          <div>
-        <div className="space-y-1">
-            <h1 className="text-2xl xs:text-2xl sm:text-3xl font-bold tracking-tight">
-              Bem vindo! {name}
-            </h1>
-            <p className="text-sm sm:text-base text-muted-foreground">
-              Gerencie suas refeições e acompanhe suas calorias diárias.
-            </p>
-        </div>
-        
-          <div className="flex flex-col xs:flex-row gap-2 w-full xs:w-auto">
-            <PDFExportButton meals={meals} userName={name} />
-            <Button 
-              className="bg-emerald-600 hover:bg-emerald-700 whitespace-nowrap"
-              onClick={() => handleAddMealWithType()}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              <span className="text-xs sm:text-sm">Adicionar Refeição</span>
-            </Button>
+        <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center gap-3 sm:gap-4">
+          <div>
+            <div className="space-y-1">
+              <h1 className="text-2xl xs:text-2xl sm:text-3xl font-bold tracking-tight">Bem vindo! {name}</h1>
+              <p className="text-sm sm:text-base text-muted-foreground">
+                Gerencie suas refeições e acompanhe suas calorias diárias.
+              </p>
+            </div>
+
+            <div className="flex flex-col xs:flex-row gap-2 w-full xs:w-auto">
+              <PDFExportButton meals={meals} userName={name} />
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700 whitespace-nowrap"
+                onClick={() => handleAddMealWithType()}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                <span className="text-xs sm:text-sm">Adicionar Refeição</span>
+              </Button>
+            </div>
+          </div>
+
+          <div className="w-full">
+            <MealStats meals={meals} />
+          </div>
+
+          <div className="w-full">
+            <MealTabs
+              meals={meals}
+              onEdit={(meal) => {
+                setRefeicaoAtual(meal)
+                setDialogState({ ...dialogState, isEditOpen: true })
+              }}
+              onDelete={callDelete}
+              onAddMeal={handleAddMealWithType}
+            />
           </div>
         </div>
 
-        <div className="w-full">
-          <MealStats meals={meals} />
-        </div>
+        <AddMealDialog
+          isOpen={dialogState.isAddOpen}
+          onOpenChange={(open) => setDialogState({ ...dialogState, isAddOpen: open })}
+          onAddMeal={handleAddMeal}
+          refeicaoNova={refeicaoNova}
+          updateRefeicaoNova={updateRefeicaoNova}
+          updateRefeicaoNovaDesc={updateRefeicaoNovaDesc}
+          updateRefeicaoNovaExtra={updateRefeicaoNovaExtra}
+          removeRefeicaoNovaExtra={removeRefeicaoNovaExtra}
+          addNewExtraField={addNewExtraField}
+        />
 
-        <div className="w-full">
-          <MealTabs
-            meals={meals}
-            onEdit={(meal) => {
-              setRefeicaoAtual(meal)
-              setDialogState({ ...dialogState, isEditOpen: true })
-            }}
-            onDelete={callDelete}
-            onAddMeal={handleAddMealWithType}
-          />
-        </div>
+        <EditMealDialog
+          isOpen={dialogState.isEditOpen}
+          onOpenChange={(open) => setDialogState({ ...dialogState, isEditOpen: open })}
+          onEditMeal={handleEditMeal}
+          refeicaoAtual={refeicaoAtual}
+          updateRefeicaoAtual={updateRefeicaoAtual}
+          updateRefeicaoAtualDesc={updateRefeicaoAtualDesc}
+          removeRefeicaoAtualExtra={removeRefeicaoAtualExtra}
+          updateRefeicaoAtualExtra={updateRefeicaoAtualExtra}
+          addCurrentExtraField={addCurrentExtraField}
+        />
+        <IntelligentMealForm onMealDetected={handleMealDetected} userPlan={"Avançado"} />
       </div>
-
-      <AddMealDialog
-        isOpen={dialogState.isAddOpen}
-        onOpenChange={(open) => setDialogState({ ...dialogState, isAddOpen: open })}
-        onAddMeal={handleAddMeal}
-        refeicaoNova={refeicaoNova}
-        updateRefeicaoNova={updateRefeicaoNova}
-        updateRefeicaoNovaDesc={updateRefeicaoNovaDesc}
-        updateRefeicaoNovaExtra={updateRefeicaoNovaExtra}
-        removeRefeicaoNovaExtra={removeRefeicaoNovaExtra}
-        addNewExtraField={addNewExtraField}
-      />
-
-      <EditMealDialog
-        isOpen={dialogState.isEditOpen}
-        onOpenChange={(open) => setDialogState({ ...dialogState, isEditOpen: open })}
-        onEditMeal={handleEditMeal}
-        refeicaoAtual={refeicaoAtual}
-        updateRefeicaoAtual={updateRefeicaoAtual}
-        updateRefeicaoAtualDesc={updateRefeicaoAtualDesc}
-        removeRefeicaoAtualExtra={removeRefeicaoAtualExtra}
-        updateRefeicaoAtualExtra={updateRefeicaoAtualExtra}
-        addCurrentExtraField={addCurrentExtraField}
-      />
-
-      <Toaster />
-      </div>
-    </div>  
+    </div>
   )
 }

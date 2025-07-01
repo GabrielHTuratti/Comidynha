@@ -97,14 +97,8 @@ export default function Header() {
             </DropdownMenu>
           ) : (
             <>
-              <Link 
-                href="/auth/customer" 
-                className="text-xs sm:text-sm font-medium hover:underline underline-offset-4 hidden xs:inline-block"
-              >
-                Cadastrar
-              </Link>
-              <Button asChild size="sm" className="bg-[#F9C900] hover:bg-[#e0b500] text-xs sm:text-sm">
-                <Link href="/auth/customer">Logar</Link>
+              <Button asChild size="sm" className="bg-[#3bbf5f] hover:bg-[#2c9147] text-xs sm:text-sm">
+                <Link href="/auth/customer">Começar</Link>
               </Button>
             </>
           )}

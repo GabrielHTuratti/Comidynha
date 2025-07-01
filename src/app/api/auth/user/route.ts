@@ -12,39 +12,30 @@ export async function GET() {
 
     const cookieStore = cookies();
     const token = (await cookieStore).get('auth_token')?.value;
-
-
     if (!token) {
       return NextResponse.json(
         { error: 'Não autorizado - Token não encontrado' },
         { status: 401 }
       );
     }
-
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const {payload} = await jwtVerify(token, secret)
-
-
     if (!payload.email) {
       return NextResponse.json(
         { error: 'Token inválido' },
         { status: 401 }
       );
     }
-
     await dbConnect();
-
     const user = await IUser.findOne({ email: payload.email })
       .select('-password -__v');
     
-
     if (!user) {
       return NextResponse.json(
         { error: 'Usuário não encontrado' },
         { status: 404 }
       );
     }
-
     return NextResponse.json({
       success: true,
       user: {
@@ -52,9 +43,10 @@ export async function GET() {
         name: user.name,
         email: user.email,
         createdAt: user.createdAt,
+        plan: user.plan,
+        reflimite: user.reflimite
       }
     });
-
   } catch (error) {
     console.error('Erro ao buscar perfil:', error);
     

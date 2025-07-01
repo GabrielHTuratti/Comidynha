@@ -1,32 +1,89 @@
 import Link from "next/link"
-import {Utensils } from "lucide-react"
+import {Badge, Check, Star, Utensils, Zap } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
+
+  
 
 export default function Home() {
+  const plans = [
+    {
+      name: "Gratuito",
+      price: "R$ 0",
+      period: "/mês",
+      description: "Perfeito para começar seu planejamento alimentar",
+      icon: <Utensils className="h-6 w-6" />,
+      features: [
+        "Cadastro de refeições básico",
+        "Visualização cronológica",
+        "Cálculo de calorias diárias",
+        "Até 20 refeições por mês",
+      ],
+      buttonText: "Começar Grátis",
+      buttonVariant: "outline" as const,
+      popular: false,
+    },
+    {
+      name: "Essencial",
+      price: "R$ 9,90",
+      period: "/mês",
+      description: "Para quem quer mais controle sobre sua alimentação",
+      icon: <Star className="h-6 w-6" />,
+      features: [
+        "Tudo do plano Gratuito",
+        "Refeições ilimitadas",
+        "Planejamento semanal",
+        "Relatórios nutricionais",
+        "Lista de compras automática",
+      ],
+      buttonText: "Assinar Essencial",
+      buttonVariant: "default" as const,
+      popular: true,
+    },
+    {
+      name: "Avançado",
+      price: "R$ 14,90",
+      period: "/mês",
+      description: "Ideal para quem busca resultados profissionais",
+      icon: <Zap className="h-6 w-6" />,
+      features: [
+        "Tudo do plano Essencial",
+        "Receitas sugeridas por IA",
+        "Análise nutricional avançada",
+        "Metas personalizadas",
+        "IA para identificação e cadastro de refeições automaticas",
+        "Notificações inteligentes",
+        "Suporte prioritário",
+      ],
+      buttonText: "Assinar Avançado",
+      buttonVariant: "default" as const,
+      popular: false,
+    },
+  ]
+  
   return (
-    <div className="flex flex-col min-h-screen">
-      <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-primary/10 to-background">
-          <div className="container px-4 md:px-6">
-            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
-              <div className="flex flex-col justify-center space-y-4">
-                <div className="space-y-2">
-                  <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-                    Faça o planejamento de suas refeições diáras!
-                  </h1>
-                  <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Experimente a versão demo! Cadastre-se no nosso site e comece já a fazer o planejamento de suas refeições diárias, de forma prática e rapida!
-                  </p>
-                </div>
+    <div className="flex flex-col items-center min-h-screen">
+      <main className="flex-1 justify-between min-h-screen">
+        <section className="w-full py-12 md:py-12 lg:py-16">
+          <div className="container px-2 md:px-4 grid gap-4 lg:grid-cols-2 lg:gap-2 items-center">
+            <div className="flex flex-col justify-center space-y-4">
+              <div className="space-y-2">
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+                  Faça o planejamento de suas refeições diáras!
+                </h1>
+                <p className="max-w-[600px] text-muted-foreground md:text-xl">
+                  Experimente a versão demo! Cadastre-se no nosso site e comece já a fazer o planejamento de suas refeições diárias, de forma prática e rapida!
+                </p>
               </div>
-              <div className="mx-auto lg:mx-0 relative">
-                <img
-                  alt="Comida1"
-                  className="mx-auto overflow-hidden rounded-xl object-cover object-center lg:order-last"
-                  height="450"
-                  src="meal.svg"
-                  width="500"
-                />
-              </div>
+            </div>
+            <div className="mx-auto lg:mx-0 relative">
+              <img
+                alt="Comida1"
+                className="mx-auto overflow-hidden rounded-xl object-cover object-center lg:order-last"
+                height="450"
+                src="meal.svg"
+                width="500"
+              />
             </div>
           </div>
         </section>
@@ -36,7 +93,7 @@ export default function Home() {
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Como funciona?</h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Nossa plataforma te ajuda a planejar sua dieta/refeição semanal/diária... 
+                  Nossa plataforma te ajuda a planejar suas refeições e a montar uma dieta balanceada especialmente para você
                 </p>
               </div>
             </div>
@@ -121,20 +178,61 @@ export default function Home() {
             </div>
           </div>
         </section>
+        <section className="w-full py-12 md:py-24 lg:py-32">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Escolha seu plano</h2>
+                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                  Encontre o plano perfeito para suas necessidades nutricionais
+                </p>
+              </div>
+            </div>
+            <div className="grid gap-6 mt-12 md:grid-cols-2 lg:grid-cols-3">
+              {plans.map((plan, index) => (
+                <Card key={index} className={`relative ${plan.popular ? "border-[#F36280] shadow-lg scale-105" : ""}`}>
+                  {plan.popular && (
+                    <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-[#F36280] text-white">
+                      Mais Popular
+                    </Badge>
+                  )}
+                  <CardHeader className="text-center">
+                    <div className="flex justify-center mb-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                        {plan.icon}
+                      </div>
+                    </div>
+                    <CardTitle className="text-xl">{plan.name}</CardTitle>
+                    <CardDescription>{plan.description}</CardDescription>
+                    <div className="flex items-baseline justify-center gap-1 mt-4">
+                      <span className="text-3xl font-bold">{plan.price}</span>
+                      <span className="text-muted-foreground">{plan.period}</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {plan.features.map((feature, featureIndex) => (
+                        <li key={featureIndex} className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                          <span className="text-sm">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                  <CardFooter>
+                    <Button className="w-full" variant={plan.buttonVariant} asChild>
+                      <Link href={plan.name === "Gratuito" ? "/signup" : `/checkout?plan=${plan.name.toLowerCase()}`}>
+                        {plan.buttonText}
+                      </Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
       </main>
-      <footer className="border-t bg-[#F36280] text-white">
-        <div className="container flex flex-col gap-6 py-8 md:flex-row md:items-center md:justify-between md:py-12">
-        <div className="flex items-center pl-4 gap-4">
-          <Utensils className="h-6 w-6 text-emerald-500" />
-            <span className="text-lg font-semibold">Comydinha</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="#" className="text-sm font-medium hover:underline underline-offset-4">
-              © 2025 Comydinha. All rights reserved.
-            </Link>
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }
