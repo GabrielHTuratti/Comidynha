@@ -16,7 +16,6 @@ const loginScheme = z.object({
 
 export async function POST(request: Request) {
   const { email, password } = await request.json();
-  console.log(email, password);
   try{
     await dbConnect();
     const validatedData = loginScheme.safeParse({email, password});
@@ -34,10 +33,8 @@ export async function POST(request: Request) {
       { error: 'Credenciais inválidas' },
       { status: 401 }
     );
-    console.log(user);
     const storedHash = String(user.password)
     const passMatch = await bcrypt.compare(password, storedHash);
-    console.log(passMatch + "\npassword: " + password + "\npassword hashed: " + storedHash)
     if(!passMatch) return NextResponse.json(
       { error: 'Credenciais inválidas' },
       { status: 401 }
@@ -47,7 +44,8 @@ export async function POST(request: Request) {
       tokenVersion: user.tokenVersion}, process.env.REFRESH_TOKEN!,{expiresIn: '1d'})
 
     const acessToken = jwt.sign({email: user.email, name: user.name,
-      userId: user._id}, process.env.JWT_SECRET!,{expiresIn: '30m'})
+      userId: user._id}, 
+      process.env.JWT_SECRET!,{expiresIn: '30m'})
     
     const activeSessions = new Set<string>();
     activeSessions.add(acessToken);
@@ -56,21 +54,22 @@ export async function POST(request: Request) {
 
     (await cookies()).set('auth_token', acessToken, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax" as const,
+      path: "/",
+      domain: "comidynha.vercel.app",
       maxAge: 60 * 30, // 30m
-      path: '/',
-      sameSite: 'none',
-      domain: 'comidynha.vercel.app'
+
     });
 
 
     (await cookies()).set('rfs_token', refreshToken, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax" as const,
+      path: "/",
+      domain: "comidynha.vercel.app",
       maxAge: 60 * 60 * 24, // 1 day
-      path: '/',
-      sameSite: 'none',
-      domain: 'comidynha.vercel.app'
     });
 
     return NextResponse.json(

@@ -14,7 +14,7 @@ export async function GET() {
     const token = (await cookieStore).get('auth_token')?.value;
     if (!token) {
       return NextResponse.json(
-        { error: 'Não autorizado - Token não encontrado' },
+        { error: 'N��o autorizado - Token não encontrado' },
         { status: 401 }
       );
     }

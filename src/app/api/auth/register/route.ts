@@ -3,7 +3,6 @@ import { cookies } from 'next/headers';
 import User from '@/model/users';
 import { dbConnect } from '@/lib/db';
 import { z } from 'zod';
-import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 const registerSchema = z.object({
@@ -24,9 +23,7 @@ export async function POST(request: Request) {
   try {
     await dbConnect();
     const body = await request.json();
-    console.log(body);
     const validatedData = registerSchema.safeParse(body);
-    console.log(validatedData.error?.errors[0].message)
     if (!validatedData.success) {
       return NextResponse.json(
         { 
@@ -47,13 +44,6 @@ export async function POST(request: Request) {
         { status: 409 }
       );
     }
-
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt); 
-    const teste = await bcrypt.compare(password, hashedPassword);
-    console.log(teste + '\n' + hashedPassword);
-
 
     const newUser = await User.create({
       name: name,

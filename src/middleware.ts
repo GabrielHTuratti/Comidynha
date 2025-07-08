@@ -23,8 +23,8 @@ export async function middleware(request: NextRequest) {
     if(refreshToken){
       const secret = new TextEncoder().encode(process.env.REFRESH_TOKEN);
       const {payload} = await jwtVerify(refreshToken, secret);
-      if(!payload.tokenVersion || !payload.userId){
-        throw new Error("Token inválido");
+      if(!payload.tokenVersion && !payload.userId){
+        throw new Error(`Token inválido`);
       }
       if (pathname.startsWith('/main') || pathname.startsWith('/api')) {
         const redirectUrl = NextResponse.redirect(new URL('/api/auth/refresh', origin))

@@ -1,109 +1,242 @@
-"use client";
+"use client"
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Utensils } from "lucide-react";
-import { useEffect, useState } from "react";
-import { getProfile, logout } from "@/services/v1";
-import { IUser } from "@/model/users";
+import { Utensils, User, Settings, CreditCard, LogOut, Crown, TrendingUp, Bell } from "lucide-react"
+import { logout } from "@/services/v1"
+import { useAuth } from "@/hooks/use-auth"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+
 export default function Header() {
-  const [name, setName] = useState<IUser["name"] | null>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, isLoading, clearUser } = useAuth()
 
-  useEffect(() => {
-    const getUser = async () => {
-      try {
-        const profile = await getProfile();
-        setName(profile.name);
-      } catch (error) {
-        console.log(error);
-        setName(null);
-      }
-    };
-    getUser();
-  }, []);
+  const handleLogout = async () => {
+    try {
+      clearUser() // Limpa o estado imediatamente para UX
+      await logout()
+    } catch (error) {
+      console.error("Erro no logout:", error)
+    }
+  }
 
-  const toggleProfileMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  const getPlanColor = (plan: string) => {
+    switch (plan?.toLowerCase()) {
+      case "avançado":
+        return "bg-gradient-to-r from-purple-500 to-pink-500"
+      case "essencial":
+        return "bg-gradient-to-r from-blue-500 to-cyan-500"
+      default:
+        return "bg-gradient-to-r from-green-500 to-emerald-500"
+    }
+  }
+
+  const getPlanIcon = (plan: string) => {
+    switch (plan?.toLowerCase()) {
+      case "avançado":
+        return <Crown className="h-3 w-3" />
+      case "essencial":
+        return <TrendingUp className="h-3 w-3" />
+      default:
+        return <User className="h-3 w-3" />
+    }
+  }
 
   return (
-  <header className="border-b bg-[#F36280] text-white sticky top-0 z-50">
-      <div className="container mx-auto flex items-center justify-between h-14 sm:h-16 px-3 sm:px-4 md:px-6">
-        <Link href="/" className="flex items-center gap-2 text-base sm:text-lg font-semibold hover:opacity-90 transition-opacity">
-          <Utensils className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-500" />
-          <span>Comydinha</span>
+    <header className="border-b bg-gradient-to-r from-[#F36280] to-[#ff7ba7] text-white sticky top-0 z-50 shadow-lg">
+      <div className="bg-gradient-to-r from-red-600 via-red-500 to-red-600 text-white text-center py-3 px-4 shadow-lg">
+        <div className="container mx-auto flex items-center justify-center gap-3 text-sm font-medium">
+          <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
+            <div className="relative">
+              <Bell className="h-4 w-4 animate-pulse" />
+              <span className="absolute -top-1 -right-1 h-2 w-2 bg-yellow-400 rounded-full animate-ping" />
+            </div>
+            <span className="font-semibold">VERSÃO BETA</span>
+          </div>
+          <span className="hidden sm:inline">•</span>
+          <span className="text-center">
+            <strong>Aviso:</strong> Este é um teste gratuito demonstrativo - todos os dados serão perdidos no lançamento
+            oficial
+          </span>
+        </div>
+      </div>
+      <div className="container mx-auto flex items-center justify-between h-16 px-4 md:px-6">
+        <Link
+          href="/"
+          className="flex items-center gap-3 text-lg font-bold hover:opacity-90 transition-all duration-200 hover:scale-105"
+        >
+          <div className="p-2 bg-white/20 rounded-full backdrop-blur-sm">
+            <Utensils className="h-6 w-6 text-emerald-400" />
+          </div>
+          <span className="hidden sm:block">Comydinha</span>
         </Link>
-        <div className="flex items-center gap-2 sm:gap-4">
-          {name ? (
-            <DropdownMenu modal={false}>
-              <DropdownMenuTrigger asChild>
-                <div className="rounded-sm bg-white flex items-center gap-2 sm:gap-4 cursor-pointer focus:outline-none hover:bg-gray-100 transition-colors">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="p-0.5 w-8 h-8 sm:w-9 sm:h-9 focus:outline-none"
-                    onClick={toggleProfileMenu}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="#06d6a0"
-                      stroke="#000000"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-7 w-7 sm:h-9 sm:w-9"
-                    >
-                      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
-                  </Button>
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 sm:w-60 p-2" align="end" forceMount>
-                <div className="px-2 py-1.5">
-                  <span className="text-sm sm:text-base font-medium">{name}</span>
-                </div>
-                <DropdownMenuItem asChild className="cursor-pointer">
-                  <Link href="/main" className="w-full px-2 py-1.5 text-sm sm:text-base">
-                    Meu Perfil
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="cursor-pointer">
-                  <Link href="/settings" className="w-full px-2 py-1.5 text-sm sm:text-base">
-                    Configurações
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="p-0">
-                  <Button
-                    size="sm"
-                    onClick={async () => {
-                      setName(null)
-                      await logout()
-                    }}
-                    className="w-full bg-red-500 hover:bg-red-600 text-white text-sm sm:text-base"
-                  >
-                    Sair
-                  </Button>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <>
-              <Button asChild size="sm" className="bg-[#3bbf5f] hover:bg-[#2c9147] text-xs sm:text-sm">
-                <Link href="/auth/customer">Começar</Link>
+
+        <div className="flex items-center gap-4">
+          {isLoading ? (
+            // Enhanced loading state
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-full animate-pulse" />
+              <div className="hidden sm:block w-20 h-4 bg-white/20 rounded animate-pulse" />
+            </div>
+          ) : user ? (
+            <div className="flex items-center gap-3">
+              {/* Notification Bell */}
+              <Button size="icon" variant="ghost" className="relative text-white hover:bg-white/20 transition-colors">
+                <Bell className="h-5 w-5" />
+                <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full animate-pulse" />
               </Button>
-            </>
+
+              {/* Profile Dropdown */}
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger asChild>
+                  <div className="flex items-center gap-3 cursor-pointer hover:bg-white/10 rounded-lg p-2 transition-all duration-200 hover:scale-105">
+                    <Avatar className="h-10 w-10 ring-2 ring-white/30 hover:ring-white/50 transition-all">
+                      <AvatarImage src={user.photoURL || "/placeholder.svg"} alt={user.name} className="object-cover" />
+                      <AvatarFallback className="bg-gradient-to-br from-emerald-400 to-cyan-400 text-white font-semibold">
+                        {user.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()
+                          .slice(0, 2)}
+                      </AvatarFallback>
+                    </Avatar>
+
+                    <div className="hidden sm:flex flex-col items-start">
+                      <span className="text-sm font-medium text-white/90 max-w-32 truncate">{user.name}</span>
+                      <Badge
+                        variant="secondary"
+                        className={`text-xs text-white border-0 ${getPlanColor(user.plan || "basico")} px-2 py-0.5`}
+                      >
+                        <span className="flex items-center gap-1">
+                          {getPlanIcon(user.plan || "basico")}
+                          {user.plan || "Básico"}
+                        </span>
+                      </Badge>
+                    </div>
+                  </div>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent
+                  className="w-72 p-0 shadow-xl border-0 bg-white/95 backdrop-blur-md"
+                  align="end"
+                  forceMount
+                >
+                  {/* Profile Header */}
+                  <div className="p-4 bg-gradient-to-r from-[#F36280] to-[#ff7ba7] text-white">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-12 w-12 ring-2 ring-white/50">
+                        <AvatarImage
+                          src={user.photoURL || "/placeholder.svg"}
+                          alt={user.name}
+                          className="object-cover"
+                        />
+                        <AvatarFallback className="bg-white/20 text-white font-semibold text-lg">
+                          {user.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .toUpperCase()
+                            .slice(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-white truncate">{user.name}</h3>
+                        <p className="text-sm text-white/80 truncate">{user.email}</p>
+                        <Badge
+                          variant="secondary"
+                          className={`mt-1 text-xs text-white border-0 ${getPlanColor(user.plan || "basico")}`}
+                        >
+                          <span className="flex items-center gap-1">
+                            {getPlanIcon(user.plan || "basico")}
+                            Plano {user.plan || "Básico"}
+                          </span>
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-2">
+                    <DropdownMenuLabel className="text-xs font-medium text-gray-500 uppercase tracking-wide px-2">
+                      Navegação
+                    </DropdownMenuLabel>
+
+                    <DropdownMenuItem asChild className="cursor-pointer rounded-md hover:bg-gray-50 transition-colors">
+                      <Link href="/main" className="flex items-center gap-3 px-3 py-2">
+                        <div className="p-1.5 bg-blue-100 rounded-md">
+                          <User className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <span className="font-medium">Meu Perfil</span>
+                          <p className="text-xs text-gray-500">Visualizar dashboard</p>
+                        </div>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem asChild className="cursor-pointer rounded-md hover:bg-gray-50 transition-colors">
+                      <Link href="/subscription" className="flex items-center gap-3 px-3 py-2">
+                        <div className="p-1.5 bg-purple-100 rounded-md">
+                          <CreditCard className="h-4 w-4 text-purple-600" />
+                        </div>
+                        <div>
+                          <span className="font-medium">Assinatura</span>
+                          <p className="text-xs text-gray-500">Gerenciar plano</p>
+                        </div>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem className="cursor-pointer rounded-md hover:bg-gray-50 transition-colors">
+                      <Link href="/configuracoes" className="flex items-center gap-3 px-3 py-2 w-full">
+                        <div className="bg-gray-100 rounded-md">
+                          <Settings className="h-5 w-5 text-gray-600" />
+                        </div>
+                        <div>
+                          <span className="font-medium">Configurações</span>
+                          <p className="text-xs text-gray-500">Preferências da conta</p>
+                        </div>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator className="my-2" />
+
+                    <DropdownMenuItem className="p-0 rounded-md overflow-hidden">
+                      <Button
+                        onClick={handleLogout}
+                        variant="ghost"
+                        className="w-full justify-start gap-3 px-3 py-2 h-auto text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
+                      >
+                        <div className="p-1.5 bg-red-100 rounded-md">
+                          <LogOut className="h-4 w-4" />
+                        </div>
+                        <div className="text-left">
+                          <span className="font-medium">Sair da conta</span>
+                          <p className="text-xs text-red-500">Fazer logout</p>
+                        </div>
+                      </Button>
+                    </DropdownMenuItem>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ) : (
+            <Button
+              asChild
+              size="sm"
+              className="bg-white text-[#F36280] hover:bg-gray-100 font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+            >
+              <Link href="/auth/customer">Começar Agora</Link>
+            </Button>
           )}
         </div>
       </div>
     </header>
-  );
+  )
 }

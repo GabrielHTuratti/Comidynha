@@ -13,11 +13,18 @@ import { PhotoPreview } from "./photo-preview"
 import { AnalysisLoading } from "./analysis-loading"
 import { MealConfirmation } from "./meal-confirmation"
 import { analyzeMealImage } from "@/services/gemini-vision"
-import type { ProcessStage, DetectedMeal, AnalysisState } from "@/types/intelligent-meal"
 import type { IRefeicao } from "@/model/refeicao"
 
+type ProcessStage = "selection" | "camera" | "preview" | "analysis" | "confirmation"
+
+interface AnalysisState {
+  isAnalyzing: boolean
+  result: IRefeicao | null
+  error: string | null
+}
+
 interface IntelligentMealFormProps {
-  onMealDetected: (mealData: Partial<IRefeicao>) => void
+  onMealDetected: (mealData: IRefeicao) => void
   userPlan: string
 }
 
@@ -58,6 +65,7 @@ export function IntelligentMealForm({ onMealDetected, userPlan }: IntelligentMea
   }
 
   const handleCameraCapture = (imageData: string) => {
+    console.log("Imagem recebida da câmera:", imageData.substring(0, 50) + "...")
     setCapturedImage(imageData)
     setStage("preview")
   }
@@ -68,29 +76,44 @@ export function IntelligentMealForm({ onMealDetected, userPlan }: IntelligentMea
       const reader = new FileReader()
       reader.onload = (e) => {
         const imageData = e.target?.result as string
-        const base64data = imageData.split(',')[1];
-        setCapturedImage(base64data)
+        console.log("Imagem selecionada da galeria:", imageData.substring(0, 50) + "...")
+        setCapturedImage(imageData)
         setStage("preview")
       }
       reader.readAsDataURL(file)
     }
   }
 
+  const handleRetakePhoto = () => {
+    setCapturedImage(null)
+    setStage("camera")
+  }
+
   const handleConfirmPhoto = async () => {
-    if (!capturedImage) return
+    if (!capturedImage) {
+      toast.error("Nenhuma imagem disponível")
+      return
+    }
 
     setStage("analysis")
     setAnalysisState({ isAnalyzing: true, result: null, error: null })
 
     try {
-      const result = await analyzeMealImage(capturedImage)
+      // Extrair base64 se necessário
+      const base64Data = capturedImage.includes(",") ? capturedImage.split(",")[1] : capturedImage
+
+      console.log("Enviando para análise:", base64Data.substring(0, 50) + "...")
+
+      const mealData = await analyzeMealImage(base64Data)
+
       setAnalysisState({
         isAnalyzing: false,
-        result,
+        result: mealData,
         error: null,
       })
       setStage("confirmation")
     } catch (error) {
+      console.error("Erro na análise:", error)
       setAnalysisState({
         isAnalyzing: false,
         result: null,
@@ -103,24 +126,7 @@ export function IntelligentMealForm({ onMealDetected, userPlan }: IntelligentMea
     }
   }
 
-  const handleConfirmMeal = (detectedMeal: DetectedMeal) => {
-    const mealData: Partial<IRefeicao> = {
-      nome: detectedMeal.name,
-      calorias: detectedMeal.nutrition.calories,
-      desc: {
-        proteinas: detectedMeal.nutrition.protein,
-        carboidratos: detectedMeal.nutrition.carbs,
-        gorduras: detectedMeal.nutrition.fat,
-        extra: detectedMeal.ingredients.map((ingredient, index) => ({
-          campoid: `ingredient_${index}`,
-          nome: "Ingrediente",
-          valor: ingredient,
-        })),
-      },
-      tipo: "almoco", // Valor padrão, pode ser ajustado
-      data: new Date().toISOString(),
-    }
-
+  const handleConfirmMeal = (mealData: IRefeicao) => {
     onMealDetected(mealData)
     handleCloseModal()
     toast.success("Refeição detectada com sucesso!", {
@@ -179,29 +185,36 @@ export function IntelligentMealForm({ onMealDetected, userPlan }: IntelligentMea
 
       case "preview":
         return capturedImage ? (
-          <PhotoPreview imageData={capturedImage} onConfirm={handleConfirmPhoto} onRetake={() => setStage("camera")} />
-        ) : null
+          <PhotoPreview imageData={capturedImage} onConfirm={handleConfirmPhoto} onRetake={handleRetakePhoto} />
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <p>Erro: Imagem não disponível</p>
+          </div>
+        )
 
       case "analysis":
         return <AnalysisLoading />
 
       case "confirmation":
         return analysisState.result ? (
-          <MealConfirmation
-            detectedMeal={analysisState.result}
-            onConfirm={handleConfirmMeal}
-            onCancel={handleCloseModal}
-          />
-        ) : null
+          <MealConfirmation meal={analysisState.result} onConfirm={handleConfirmMeal} onCancel={handleCloseModal} />
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <p>Erro: Resultado da análise não disponível</p>
+          </div>
+        )
 
       default:
-        return null
+        return (
+          <div className="flex items-center justify-center h-full">
+            <p>Estado desconhecido</p>
+          </div>
+        )
     }
   }
 
   return (
     <>
-      {/* FAB - Floating Action Button */}
       <div className="fixed bottom-6 right-6 z-50">
         <Button
           onClick={handleOpenModal}
@@ -218,7 +231,6 @@ export function IntelligentMealForm({ onMealDetected, userPlan }: IntelligentMea
         )}
       </div>
 
-      {/* Modal */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className={`max-w-4xl h-[90vh] p-0 ${stage === "camera" ? "bg-black" : "bg-white"}`}>
           {stage !== "camera" && (
