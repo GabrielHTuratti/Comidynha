@@ -11,11 +11,27 @@ interface PhotoPreviewProps {
 }
 
 export function PhotoPreview({ imageData, onConfirm, onRetake }: PhotoPreviewProps) {
+  console.log("PhotoPreview recebeu imageData:", imageData ? imageData.substring(0, 50) + "..." : "null")
+
+  if (!imageData) {
+    return (
+      <div className="flex items-center justify-center h-full bg-gray-100">
+        <p className="text-gray-500">Imagem não disponível</p>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col h-full">
       {/* Preview da imagem */}
       <div className="flex-1 relative bg-black">
-        <Image src={imageData || "/placeholder.svg"} alt="Preview da refeição" fill className="object-contain" />
+        <Image
+          src={imageData || "/placeholder.svg"}
+          alt="Preview da refeição"
+          fill
+          className="object-contain"
+          unoptimized
+        />
       </div>
 
       {/* Controles */}

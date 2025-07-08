@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useCallback } from "react"
+import { useState, useRef, useCallback, useEffect } from "react"
 import type { CameraState } from "@/types/intelligent-meal"
 
 export function useCamera() {
@@ -13,17 +13,30 @@ export function useCamera() {
   })
 
   const videoRef = useRef<HTMLVideoElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const streamRef = useRef<MediaStream | null>(null)
 
-  const requestCameraPermission = useCallback(async () => {
+  const initCamera = useCallback(async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+      // Parar stream anterior se existir
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop())
+      }
+
+      // Verificar se o navegador suporta getUserMedia
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error("Câmera não suportada neste navegador")
+      }
+
+      const constraints = {
         video: {
           facingMode: cameraState.facingMode,
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
+          width: { ideal: 1280, max: 1920 },
+          height: { ideal: 720, max: 1080 },
         },
-      })
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints)
+      streamRef.current = stream
 
       setCameraState((prev) => ({
         ...prev,
@@ -33,54 +46,58 @@ export function useCamera() {
         error: null,
       }))
 
+      // Aguardar um pouco antes de definir o srcObject
       if (videoRef.current) {
         videoRef.current.srcObject = stream
+
+        // Aguardar o vídeo carregar
+        return new Promise<boolean>((resolve) => {
+          const video = videoRef.current!
+          video.onloadedmetadata = () => {
+            video
+              .play()
+              .then(() => resolve(true))
+              .catch(() => resolve(false))
+          }
+        })
       }
 
       return true
     } catch (error) {
+      let errorMessage = "Não foi possível acessar a câmera."
+
+      if (error instanceof Error) {
+        if (error.name === "NotAllowedError") {
+          errorMessage = "Permissão de câmera negada. Permita o acesso e tente novamente."
+        } else if (error.name === "NotFoundError") {
+          errorMessage = "Nenhuma câmera encontrada no dispositivo."
+        } else if (error.name === "NotReadableError") {
+          errorMessage = "Câmera está sendo usada por outro aplicativo."
+        }
+      }
+
       setCameraState((prev) => ({
         ...prev,
-        error: "Não foi possível acessar a câmera. Verifique as permissões.",
+        error: errorMessage,
         hasPermission: false,
+        isOpen: false,
       }))
-      console.log(error)
+
+      console.error("Camera error:", error)
       return false
     }
   }, [cameraState.facingMode])
 
   const switchCamera = useCallback(async () => {
-    if (cameraState.stream) {
-      cameraState.stream.getTracks().forEach((track) => track.stop())
-    }
-
     const newFacingMode = cameraState.facingMode === "user" ? "environment" : "user"
     setCameraState((prev) => ({ ...prev, facingMode: newFacingMode }))
-
-    setTimeout(() => {
-      requestCameraPermission()
-    }, 100)
-  }, [cameraState.stream, cameraState.facingMode, requestCameraPermission])
-
-  const capturePhoto = useCallback((): string | null => {
-    if (!videoRef.current || !canvasRef.current) return null
-
-    const video = videoRef.current
-    const canvas = canvasRef.current
-    const context = canvas.getContext("2d")
-
-    if (!context) return null
-
-    canvas.width = video.videoWidth
-    canvas.height = video.videoHeight
-    context.drawImage(video, 0, 0)
-
-    return canvas.toDataURL("image/jpeg", 0.8)
-  }, [])
+    await initCamera()
+  }, [cameraState.facingMode, initCamera])
 
   const stopCamera = useCallback(() => {
-    if (cameraState.stream) {
-      cameraState.stream.getTracks().forEach((track) => track.stop())
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop())
+      streamRef.current = null
     }
 
     setCameraState((prev) => ({
@@ -88,15 +105,20 @@ export function useCamera() {
       isOpen: false,
       stream: null,
     }))
-  }, [cameraState.stream])
+  }, [])
+
+  // Limpeza quando o componente desmontar
+  useEffect(() => {
+    return () => {
+      stopCamera()
+    }
+  }, [stopCamera])
 
   return {
     cameraState,
     videoRef,
-    canvasRef,
-    requestCameraPermission,
+    initCamera,
     switchCamera,
-    capturePhoto,
     stopCamera,
   }
 }

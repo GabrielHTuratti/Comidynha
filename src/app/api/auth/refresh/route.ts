@@ -1,72 +1,94 @@
-import { jwtVerify } from 'jose';
-import jwt from 'jsonwebtoken';
-import { cookies } from 'next/headers';
-import User from '@/model/users';
-
-import { NextRequest, NextResponse } from "next/server";
+import { jwtVerify } from "jose"
+import jwt from "jsonwebtoken"
+import { cookies } from "next/headers"
+import User from "@/model/users"
+import { dbConnect } from "@/lib/db"
+import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
-    try{
-        const refreshToken = (await cookies()).get('rfs_token')?.value;
-        const redirectURL = request.cookies.get("redirect_url")?.value || "/main";
+  try {
+    await dbConnect()
 
-        if(!refreshToken) {
-            return NextResponse.json({error: "Não autorizado"}, {status: 401});
-        }
-        const secret = new TextEncoder().encode(process.env.REFRESH_TOKEN);        
-        const {payload} = await jwtVerify(refreshToken, secret);
-        
-        const user = await User.findOne({ where: { _id: payload.userId } });
-        if(!user || payload.tokenVersion !== user.tokenVersion){
-            (await cookies()).delete('rfs_token');
-            return NextResponse.json({ error: 'Token revogado' }, { status: 401 });
-        }
+    const refreshToken = (await cookies()).get("rfs_token")?.value
+    const redirectURL = request.cookies.get("redirect_url")?.value || "/main"
 
-        const newTokenVersion = user.tokenVersion + 1
-        const newRefreshToken = jwt.sign({
-            userId: user._id,
-            tokenVersion: newTokenVersion}, process.env.REFRESH_TOKEN!,{expiresIn: '1d'})
-
-        
-
-        const newAccesToken = jwt.sign({email: user.email,
-              userId: user._id}, process.env.JWT_SECRET!,{expiresIn: '30m'})
-
-
-
-        await User.updateOne({ _id: user._id },
-                             { $set: { tokenVersion: user.tokenVersion } });
-
-        const activeSessions = new Set<string>();
-
-        const response = NextResponse.redirect(new URL(redirectURL, request.url));
-
-        activeSessions.add(newAccesToken);
-        response.cookies.set('auth_token', newAccesToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 60 * 60 * 0.5, // 30m
-            path: '/',
-            domain: 'localhost'
-        });
-
-        activeSessions.add(newRefreshToken);
-        response.cookies.set('rfs_token', newRefreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 60 * 60 * 24, // 1 day
-            path: '/',
-            domain: 'localhost'
-        });
-
-        return response;
-
-    }catch(error){
-        console.error('Erro no refresh:', error);
-        const response = NextResponse.redirect(new URL('/auth', request.url));
-        response.cookies.delete('auth_token');
-        response.cookies.delete('rfs_token');
-        return response;
+    if (!refreshToken) {
+      return NextResponse.json({ error: "Não autorizado - Token não encontrado" }, { status: 401 })
     }
 
+    const secret = new TextEncoder().encode(process.env.REFRESH_TOKEN)
+    let payload
+
+    try {
+      const result = await jwtVerify(refreshToken, secret)
+      payload = result.payload
+    } catch (jwtError) {
+
+      console.log(jwtError)
+      const response = NextResponse.redirect(new URL("/auth/customer", request.url))
+      response.cookies.delete("auth_token")
+      response.cookies.delete("rfs_token")
+
+      return response
+    }
+
+    const user = await User.findById(payload.userId)
+
+    if (!user) {
+
+      const response = NextResponse.redirect(new URL("/auth/customer", request.url))
+      response.cookies.delete("auth_token")
+      response.cookies.delete("rfs_token")
+
+      return response
+    }
+
+    if (payload.tokenVersion !== user.tokenVersion) {
+
+      const response = NextResponse.redirect(new URL("/auth/customer", request.url))
+      response.cookies.delete("auth_token")
+      response.cookies.delete("rfs_token")
+
+      return response
+    }
+
+    const newAccessToken = jwt.sign(
+      {
+        email: user.email,
+        name: user.name,
+        userId: user._id,
+      },
+      process.env.JWT_SECRET!,
+      { expiresIn: "30m" },
+    )
+
+
+    const response = NextResponse.redirect(new URL(redirectURL, request.url))
+
+    response.cookies.set("auth_token", newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 30, // 30 minutos
+    })
+
+    response.cookies.set("rfs_token", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24, // 1 dia
+    })
+
+    return response
+  } catch (error) {
+    console.error("Erro no refresh:", error)
+
+    const response = NextResponse.redirect(new URL("/auth/customer", request.url))
+    response.cookies.delete("auth_token")
+    response.cookies.delete("rfs_token")
+
+    return response
+  }
 }

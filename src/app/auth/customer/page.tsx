@@ -10,8 +10,10 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle} from "lucide-react"
+import { AlertCircle } from "lucide-react"
+import { Separator } from "@/components/ui/separator"
 import { authenticate, registrar } from "@/services/v1"
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton"
 
 export default function CustomerAuthPage() {
   const [loginEmail, setLoginEmail] = useState("")
@@ -32,9 +34,9 @@ export default function CustomerAuthPage() {
     setLoginError("")
     setIsLoginLoading(true)
     try {
-      const response = await authenticate(loginEmail, loginSenha);
-      if(response != 200){
-        throw new Error("Algo de errado naõ esta certo")
+      const response = await authenticate(loginEmail, loginSenha)
+      if (response != 200) {
+        throw new Error("Algo de errado não está certo")
       }
       router.push("/main")
     } catch (error) {
@@ -50,7 +52,7 @@ export default function CustomerAuthPage() {
     setRegisterLoading(true)
 
     try {
-      await registrar(registerEmail, registerNome, registerSenha);
+      await registrar(registerEmail, registerNome, registerSenha)
       router.push("/main")
     } catch (error) {
       setRegisterError(`Erro de registro: ${error instanceof Error ? error.message : String(error)}`)
@@ -68,9 +70,9 @@ export default function CustomerAuthPage() {
             <p className="text-muted-foreground mt-2">Faça seu login ou crie uma conta para gerenciar suas refeições</p>
           </div>
 
-          <Tabs defaultValue="login" className="w-full ">
+          <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger  value="login">Login</TabsTrigger>
+              <TabsTrigger value="login">Login</TabsTrigger>
               <TabsTrigger value="register">Registrar</TabsTrigger>
             </TabsList>
 
@@ -78,9 +80,21 @@ export default function CustomerAuthPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Login</CardTitle>
-                  <CardDescription>Entre seu email e senha.</CardDescription>
+                  <CardDescription>Entre com seu email e senha ou use o Google.</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
+                  {/* Botão do Google */}
+                  <GoogleSignInButton />
+
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <Separator className="w-full" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-background px-2 text-muted-foreground">Ou continue com email</span>
+                    </div>
+                  </div>
+
                   <form onSubmit={loginHandleSubmit} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="login-email">Email</Label>
@@ -124,9 +138,21 @@ export default function CustomerAuthPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Registrar</CardTitle>
-                  <CardDescription>Crie uma nova conta.</CardDescription>
+                  <CardDescription>Crie uma nova conta rapidamente.</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
+                  {/* Botão do Google */}
+                  <GoogleSignInButton />
+
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <Separator className="w-full" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-background px-2 text-muted-foreground">Ou registre-se com email</span>
+                    </div>
+                  </div>
+
                   <form onSubmit={registerHandleSubmit} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="register-nome">Nome</Label>
@@ -182,4 +208,3 @@ export default function CustomerAuthPage() {
     </div>
   )
 }
-

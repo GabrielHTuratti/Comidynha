@@ -8,23 +8,31 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Check, Edit3, Plus, X, Sparkles } from "lucide-react"
-import type { DetectedMeal } from "@/types/intelligent-meal"
+import { IRefeicao } from "@/model/refeicao"
 
 interface MealConfirmationProps {
-  detectedMeal: DetectedMeal
-  onConfirm: (mealData: DetectedMeal) => void
+  meal: IRefeicao
+  onConfirm: (mealData: IRefeicao) => void
   onCancel: () => void
 }
 
-export function MealConfirmation({ detectedMeal, onConfirm, onCancel }: MealConfirmationProps) {
-  const [editedMeal, setEditedMeal] = useState<DetectedMeal>(detectedMeal)
+export function MealConfirmation({ meal, onConfirm, onCancel }: MealConfirmationProps) {
+  const [editedMeal, setEditedMeal] = useState<IRefeicao>(meal)
   const [newIngredient, setNewIngredient] = useState("")
 
   const addIngredient = () => {
     if (newIngredient.trim()) {
       setEditedMeal((prev) => ({
         ...prev,
-        ingredients: [...prev.ingredients, newIngredient.trim()],
+        ingredients: [...(prev.ingredients || []), newIngredient.trim()],
+        desc: {
+          ...prev.desc,
+          extra: [...(prev.desc.extra || []), {
+            campoid: Date.now().toString(),
+            nome: "Ingrediente",
+            valor: newIngredient.trim()
+          }]
+        }
       }))
       setNewIngredient("")
     }
@@ -33,17 +41,21 @@ export function MealConfirmation({ detectedMeal, onConfirm, onCancel }: MealConf
   const removeIngredient = (index: number) => {
     setEditedMeal((prev) => ({
       ...prev,
-      ingredients: prev.ingredients.filter((_, i) => i !== index),
+      ingredients: prev.ingredients?.filter((_, i) => i !== index) || [],
+      desc: {
+        ...prev.desc,
+        extra: prev.desc.extra?.filter((_, i) => i !== index) || []
+      }
     }))
   }
 
-  const updateNutrition = (field: keyof DetectedMeal["nutrition"], value: string | number) => {
+  const updateNutrition = (field: keyof typeof editedMeal.desc, value: string) => {
     setEditedMeal((prev) => ({
       ...prev,
-      nutrition: {
-        ...prev.nutrition,
-        [field]: value,
-      },
+      desc: {
+        ...prev.desc,
+        [field]: value
+      }
     }))
   }
 
@@ -59,7 +71,11 @@ export function MealConfirmation({ detectedMeal, onConfirm, onCancel }: MealConf
             </Badge>
           </div>
           <h2 className="text-xl font-semibold">Confirme os dados detectados</h2>
-          <p className="text-sm text-muted-foreground">Confiança: {Math.round(editedMeal.confidence * 100)}%</p>
+          {editedMeal.confidence && (
+            <p className="text-sm text-muted-foreground">
+              Confiança: {Math.round(editedMeal.confidence * 100)}%
+            </p>
+          )}
         </div>
 
         {/* Nome do prato */}
@@ -72,8 +88,8 @@ export function MealConfirmation({ detectedMeal, onConfirm, onCancel }: MealConf
           </CardHeader>
           <CardContent>
             <Input
-              value={editedMeal.name}
-              onChange={(e) => setEditedMeal((prev) => ({ ...prev, name: e.target.value }))}
+              value={editedMeal.nome}
+              onChange={(e) => setEditedMeal((prev) => ({ ...prev, nome: e.target.value }))}
               placeholder="Nome da refeição"
             />
           </CardContent>
@@ -86,7 +102,7 @@ export function MealConfirmation({ detectedMeal, onConfirm, onCancel }: MealConf
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex flex-wrap gap-2">
-              {editedMeal.ingredients.map((ingredient, index) => (
+              {editedMeal.ingredients?.map((ingredient, index) => (
                 <Badge key={index} variant="outline" className="flex items-center gap-1 pr-1">
                   {ingredient}
                   <Button
@@ -129,32 +145,35 @@ export function MealConfirmation({ detectedMeal, onConfirm, onCancel }: MealConf
                 <Input
                   id="calories"
                   type="number"
-                  value={editedMeal.nutrition.calories}
-                  onChange={(e) => updateNutrition("calories", Number.parseInt(e.target.value) || 0)}
+                  value={editedMeal.calorias}
+                  onChange={(e) => setEditedMeal(prev => ({
+                    ...prev,
+                    calorias: Number(e.target.value) || 0
+                  }))}
                 />
               </div>
               <div>
                 <Label htmlFor="protein">Proteínas (g)</Label>
                 <Input
                   id="protein"
-                  value={editedMeal.nutrition.protein}
-                  onChange={(e) => updateNutrition("protein", e.target.value)}
+                  value={editedMeal.desc.proteinas || ""}
+                  onChange={(e) => updateNutrition("proteinas", e.target.value)}
                 />
               </div>
               <div>
                 <Label htmlFor="carbs">Carboidratos (g)</Label>
                 <Input
                   id="carbs"
-                  value={editedMeal.nutrition.carbs}
-                  onChange={(e) => updateNutrition("carbs", e.target.value)}
+                  value={editedMeal.desc.carboidratos || ""}
+                  onChange={(e) => updateNutrition("carboidratos", e.target.value)}
                 />
               </div>
               <div>
                 <Label htmlFor="fat">Gorduras (g)</Label>
                 <Input
                   id="fat"
-                  value={editedMeal.nutrition.fat}
-                  onChange={(e) => updateNutrition("fat", e.target.value)}
+                  value={editedMeal.desc.gorduras || ""}
+                  onChange={(e) => updateNutrition("gorduras", e.target.value)}
                 />
               </div>
             </div>

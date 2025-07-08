@@ -2,77 +2,49 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
+// import { useState, useEffect } from "react"
+// import { useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, CreditCard, Shield, Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Separator } from "@/components/ui/separator"
+import { ArrowLeft } from "lucide-react"
 
 export default function CheckoutPage() {
-  const searchParams = useSearchParams()
-  const planParam = searchParams.get("plan")
-  const [selectedPlan, setSelectedPlan] = useState("")
-  const [paymentMethod, setPaymentMethod] = useState("credit-card")
+  // const searchParams = useSearchParams()
+  // const planParam = searchParams.get("plan")
+  // const [selectedPlan, setSelectedPlan] = useState("")
 
-  const plans = {
-    essencial: {
-      name: "Essencial",
-      price: 9.99,
-      features: [
-        "Refeições ilimitadas",
-        "Planejamento semanal",
-        "Relatórios nutricionais",
-        "Lista de compras automática",
-        "Backup na nuvem",
-      ],
-    },
-    avancado: {
-      name: "Avançado",
-      price: 14.9,
-      features: [
-        "Tudo do Essencial",
-        "Receitas sugeridas por IA",
-        "Análise nutricional avançada",
-        "Metas personalizadas",
-        "Exportação PDF/Excel",
-        "Suporte prioritário",
-      ],
-    },
-    premium: {
-      name: "Premium",
-      price: 30,
-      features: [
-        "Tudo do Avançado",
-        "Planejamento mensal",
-        "Análise de tendências",
-        "Integração wearables",
-        "Consultoria nutricional",
-        "API para integrações",
-        "Suporte 24/7",
-      ],
-    },
-  }
+  // const plans = {
+  //   essencial: {
+  //     name: "Essencial",
+  //     price: 9.99,
+  //     features: [
+  //       "Refeições ilimitadas",
+  //       "Planejamento semanal",
+  //       "Relatórios nutricionais",
+  //       "Lista de compras automática",
+  //       "Backup na nuvem",
+  //     ],
+  //   },
+  //   avancado: {
+  //     name: "Avançado",
+  //     price: 14.9,
+  //     features: [
+  //       "Tudo do Essencial",
+  //       "Receitas sugeridas por IA",
+  //       "Análise nutricional avançada",
+  //       "Metas personalizadas",
+  //       "Exportação PDF/Excel",
+  //       "Suporte prioritário",
+  //     ],
+  //   },
+  // }
 
-  useEffect(() => {
-    if (planParam && plans[planParam as keyof typeof plans]) {
-      setSelectedPlan(planParam)
-    } else {
-      setSelectedPlan("essencial")
-    }
-  }, [planParam])
-
-  const currentPlan = plans[selectedPlan as keyof typeof plans]
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Aqui você implementaria a lógica de pagamento
-    alert("Redirecionando para processamento do pagamento...")
-  }
+  // useEffect(() => {
+  //   if (planParam && plans[planParam as keyof typeof plans]) {
+  //     setSelectedPlan(planParam)
+  //   } else {
+  //     setSelectedPlan("essencial")
+  //   }
+  // }, [planParam])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background">
@@ -83,9 +55,15 @@ export default function CheckoutPage() {
             Voltar para início
           </Link>
         </div>
+      </div>
+    </div>
+  )
+}
 
-        <div className="grid gap-8 lg:grid-cols-2">
-          {/* Resumo do Pedido */}
+
+
+/*
+<div className="grid gap-8 lg:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>Resumo do Pedido</CardTitle>
@@ -132,7 +110,6 @@ export default function CheckoutPage() {
             </CardContent>
           </Card>
 
-          {/* Formulário de Pagamento */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -206,7 +183,4 @@ export default function CheckoutPage() {
             </CardFooter>
           </Card>
         </div>
-      </div>
-    </div>
-  )
-}
+        */
