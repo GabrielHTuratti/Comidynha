@@ -431,7 +431,7 @@ export default function Home() {
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl mb-4">O que nossos usuários dizem</h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
-                Milhares de pessoas já transformaram sua alimentação com o Comydinha
+                Milhares de pessoas já transformaram sua alimentação com o comidynha
               </p>
             </div>
             <div className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto">
@@ -530,7 +530,7 @@ export default function Home() {
           <div className="container px-4 md:px-6">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl mb-4">Perguntas Frequentes</h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">Tire suas dúvidas sobre o Comydinha</p>
+              <p className="text-gray-600 max-w-2xl mx-auto">Tire suas dúvidas sobre o comidynha</p>
             </div>
             <div className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
               {faqs.map((faq, index) => (

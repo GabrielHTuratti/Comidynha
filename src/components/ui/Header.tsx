@@ -76,7 +76,7 @@ export default function Header() {
           <div className="p-2 bg-white/20 rounded-full backdrop-blur-sm">
             <Utensils className="h-6 w-6 text-emerald-400" />
           </div>
-          <span className="hidden sm:block">Comydinha</span>
+          <span className="hidden sm:block">comidynha</span>
         </Link>
 
         <div className="flex items-center gap-4">
