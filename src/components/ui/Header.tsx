@@ -63,7 +63,7 @@ export default function Header() {
           </div>
           <span className="hidden sm:inline">•</span>
           <span className="text-center">
-            <strong>Aviso:</strong> Este é um teste gratuito demonstrativo - todos os dados serão perdidos no lançamento
+            <strong>Aviso:</strong> Este é um teste gratuito demonstrativo erros são esperados - todos os dados serão perdidos no lançamento
             oficial
           </span>
         </div>
